@@ -174,7 +174,10 @@ export function Correction({ claim, quote }: { claim: string; quote: QuoteRef })
       <h3 className={styles.boxTitle}>For the record</h3>
       <p className={styles.claim}>
         <span className={styles.claimLabel}>The claim</span>
-        <LinkNames text={claim} />
+        {/* Struck through on its own span: a decoration on the paragraph would strike the label too. */}
+        <span className={styles.claimText}>
+          <LinkNames text={claim} />
+        </span>
       </p>
       <HighlightTarget id={fix.id} className={styles.fix}>
         <span className={styles.claimLabel}>

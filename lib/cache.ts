@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { Story } from "./hn";
 import { getStore } from "./store";
 import type { Thread } from "./thread";
+import { getCommentTimeline, type ThreadShapeComment } from "./tools";
 import { CACHE_VERSION } from "./version";
 
 // What Hackerpaper caches, and for how long. Development never caches: every page is fetched and
@@ -48,16 +49,22 @@ export const keys = {
 };
 const blobs = {
   edition: (id: number, stamp: string) => `${CACHE_VERSION}/editions/${id}/${stamp}.json`,
+  /** A run's whole thread (for the map while it's written) and the part streamed to visitors. */
   thread: (id: number, run: string) => `${CACHE_VERSION}/threads/${id}/${run}.json`,
+  view: (id: number, run: string) => `${CACHE_VERSION}/threads/${id}/${run}.view.json`,
   article: (url: string) => `${CACHE_VERSION}/articles/${createHash("sha256").update(url).digest("hex").slice(0, 40)}.json`,
 };
 
 // ─── Editions ────────────────────────────────────────────────────────────────
 
-/** A finished edition, as stored: the program and the thread it was written from. */
+/**
+ * A finished edition, as stored: the program, the part of the thread it refers to (editionView in
+ * lib/thread-view.ts, which is all the page needs), and the whole thread's shape for its map.
+ */
 export type EditionDoc = {
   program: string;
   thread: Thread;
+  timeline: ThreadShapeComment[];
   model: string;
   writtenAt: number;
   /** The story's age when this edition was written, in seconds. */
@@ -66,7 +73,7 @@ export type EditionDoc = {
 };
 
 /** The pointer to a story's newest edition (and the entry for it in the version list). */
-export type EditionRecord = Omit<EditionDoc, "program" | "thread"> & { blob: string };
+export type EditionRecord = Omit<EditionDoc, "program" | "thread" | "timeline"> & { blob: string };
 
 export async function loadEditionRecord(id: number): Promise<EditionRecord | null> {
   return getStore().get<EditionRecord>(keys.edition(id));
@@ -144,25 +151,32 @@ export const LOCK_TTL = 4 * 60;
 /** How long a run's events are kept, for late joiners. */
 export const STREAM_TTL = 15 * 60;
 
-export function saveRunThread(id: number, run: string, thread: Thread): Promise<void> {
-  return getStore().putBlob(blobs.thread(id, run), JSON.stringify(thread));
+/** Stores a run's thread: whole (for the map) and the writer's view (for visitors following it). */
+export async function saveRunThread(id: number, run: string, thread: Thread, view: Thread): Promise<void> {
+  const store = getStore();
+  await Promise.all([
+    store.putBlob(blobs.thread(id, run), JSON.stringify(thread)),
+    store.putBlob(blobs.view(id, run), JSON.stringify(view)),
+  ]);
 }
 
-export async function loadRunThread(id: number, run: string): Promise<Thread | null> {
-  const raw = await getStore().getBlob(blobs.thread(id, run));
+/** The part of a run's thread that visitors following it receive. */
+export async function loadRunView(id: number, run: string): Promise<Thread | null> {
+  const raw = await getStore().getBlob(blobs.view(id, run));
   return raw ? (JSON.parse(raw) as Thread) : null;
 }
 
-/** The latest thread for a story: the newest edition's, or the one being written now. */
-export async function loadLatestThread(id: number): Promise<Thread | null> {
+/** The shape of a story's thread for its map: from the run being written, or the newest edition. */
+export async function loadLatestTimeline(id: number): Promise<ThreadShapeComment[] | null> {
   const store = getStore();
   const running = await store.get<Run>(keys.lock(id));
   if (running) {
-    const thread = await loadRunThread(id, running.run);
-    if (thread) return thread;
+    const raw = await store.getBlob(blobs.thread(id, running.run));
+    if (raw) return getCommentTimeline(JSON.parse(raw) as Thread, { id }).comments;
   }
   const record = await loadEditionRecord(id);
-  return record ? ((await loadEdition(record))?.thread ?? null) : null;
+  const doc = record && (await loadEdition(record));
+  return doc?.timeline ?? null;
 }
 
 // ─── Articles and the front page ────────────────────────────────────────────

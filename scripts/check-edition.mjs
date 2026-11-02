@@ -60,6 +60,20 @@ for (const el of elements.filter((e) => e.typeName === "Prose" || e.typeName ===
   for (const [, name] of text.matchAll(/@([\w-]+)/g))
     if (!people.has(name)) problems.push({ code: "unknown-handle", message: `${el.typeName}: @${name} is not in the thread` });
 }
+
+// Any text that names the same person three times or more has gone wrong (the model looping, or
+// avoiding pronouns by repeating the handle).
+(function walk(node) {
+  if (Array.isArray(node)) return node.forEach(walk);
+  if (typeof node === "string") {
+    const counts = {};
+    for (const [, name] of node.matchAll(/@([\w-]+)/g)) counts[name] = (counts[name] ?? 0) + 1;
+    for (const [name, n] of Object.entries(counts))
+      if (n >= 3) problems.push({ code: "repeated-handle", message: `@${name} ${n} times in: "${node.slice(0, 120)}…"` });
+    return;
+  }
+  if (node && typeof node === "object") Object.values(node).forEach(walk);
+})(result.root);
 // Every edition needs the thread map (its quoted dots are derived from the program, so no list to check).
 if (!elements.some((e) => e.typeName === "ThreadMap"))
   problems.push({ code: "missing-map", message: "the edition has no ThreadMap" });

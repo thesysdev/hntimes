@@ -75,51 +75,7 @@
   font-weight: 600;
 }
 
-/* Hover previews: the nearest comment's author, timing and opening words, beside its dot. */
-.plotWrap {
-  position: relative;
-}
-
-.plot[data-interactive] {
-  cursor: pointer;
-}
-
-.preview {
-  position: absolute;
-  z-index: 2;
-  width: min(22rem, 70vw);
-  transform: translate(0.9rem, -50%);
-  padding: var(--space-3) var(--space-4);
-  background: var(--paper);
-  border: 1px solid var(--rule-strong);
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.12);
-  pointer-events: none;
-  display: grid;
-  gap: var(--space-1);
-}
-
-.preview[data-flip] {
-  transform: translate(calc(-100% - 0.9rem), -50%);
-}
-
-.previewMeta {
-  font-family: var(--font-ui);
-  font-size: var(--step--2);
-  font-variant-numeric: lining-nums;
-  color: var(--ink-3);
-}
-
-.previewMeta strong {
-  color: var(--ink);
-}
-
-.previewText {
-  font-size: var(--step--1);
-  line-height: 1.45;
-  color: var(--ink);
-}
-
-/* Any dot the pointer is on, quoted or not, grows and turns orange. */
+/* A dot lit from the page (a hovered quote or name), quoted or not, grows and turns orange. */
 .dot[data-active] {
   fill: var(--accent);
   opacity: 1;

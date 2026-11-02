@@ -8,6 +8,7 @@ import { type EditionEvent, REASONING, type Reasoning, writeEdition } from "@/li
 import { fetchStory } from "@/lib/hn";
 import { bareProgram, follow, replay, startOrJoin } from "@/lib/live";
 import { loadSnapshot, saveSnapshot } from "@/lib/snapshots";
+import { editionView, writerView } from "@/lib/thread-view";
 
 // POST /api/edition {url}: a story's edition as NDJSON events (see EditionEvent in lib/generate.ts).
 //
@@ -37,8 +38,19 @@ const ndjson = (events: AsyncIterable<Record<string, unknown>> | Iterable<Record
   return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } });
 };
 
+/** The body is a story URL (and, in development, a model); anything bigger is refused unread. */
+const MAX_BODY_BYTES = 2_000;
+
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as { url?: unknown; model?: unknown; reasoning?: unknown };
+  const raw = await request.text();
+  if (raw.length > MAX_BODY_BYTES) return Response.json({ error: "Request too large" }, { status: 413 });
+  const body = (() => {
+    try {
+      return JSON.parse(raw) as { url?: unknown; model?: unknown; reasoning?: unknown };
+    } catch {
+      return {};
+    }
+  })();
   const id = storyIdFrom(String(body.url ?? "").trim());
   if (!id) return Response.json({ error: "Give a Hacker News item URL, like news.ycombinator.com/item?id=123" }, { status: 400 });
   return caching ? cachedEdition(request, Number(id)) : freshEdition(request, id, body);
@@ -89,8 +101,11 @@ function freshEdition(request: Request, id: string, body: { model?: unknown; rea
       id,
       ...(model ? { model, effort } : effort ? { effort } : {}),
       emit: (event) => {
-        if (event.type === "thread") void saveSnapshot(event.thread);
-        queue.push(event);
+        // The whole thread stays on disk (for the checker); the page gets the writer's view.
+        if (event.type === "thread") {
+          void saveSnapshot(event.thread);
+          queue.push({ type: "thread", thread: writerView(event.thread) });
+        } else queue.push(event);
         wake();
       },
       signal: request.signal,
@@ -139,7 +154,7 @@ export async function GET(request: Request) {
   if (!thread || runs.length === 0) return Response.json({ error: `No saved run for story ${id}` }, { status: 404 });
   const program = await readFile(path.join(process.cwd(), "runs", runs[runs.length - 1]), "utf8");
   const events = [
-    { type: "thread", thread },
+    { type: "thread", thread: editionView(thread, program) },
     { type: "text", delta: program },
     { type: "done", model: `replay of ${runs[runs.length - 1]}`, ms: 0, firstTokenMs: 0 },
   ];

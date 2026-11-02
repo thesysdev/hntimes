@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { getComment, plainText, type Thread } from "./thread";
+import { selectComments } from "./thread-prompt";
 
 // The assignment editor: a quick model pass over the thread before the edition is written. It
 // decides what the story is (the angle and the kind of story), who the people worth quoting are,
@@ -24,6 +25,8 @@ export type EditorNotes = {
   angle: string;
   /** A working headline the writer may improve. */
   headline: string;
+  /** The irony or human detail that makes the thread worth reading. */
+  hook: string;
   /** People worth quoting, by a comment of theirs, with who they say they are. */
   cast: { id: number; author: string; who: string }[];
   /** The moments the story should be built around (up to 3). */
@@ -61,13 +64,14 @@ Reply with JSON only:
 {
   "shape": one of ${SHAPES.map((s) => `"${s}"`).join(", ")},
   "angle": "the news in one sentence of at most 25 words: what happened, and what readers are fighting about or learned",
-  "headline": "a working headline: concrete subject, active verb, under 12 words",
+  "headline": "a working headline in a magazine's manner: two to six words, a phrase, image or light pun",
+  "hook": "one sentence: the irony, contradiction or human detail that makes this thread worth reading",
   "cast": [{"id": comment id, "who": "at most 8 words: who they are, from what they say about themselves"}],
   "moments": [{"id": comment id, "why": "at most 8 words"}]
 }
 Shapes: debate (the thread splits into camps), review (Show HN or a product people tried), advice (Ask HN, readers answering), postmortem (an outage, failure or incident), launch (a release or announcement with numbers), explainer (a technical idea people worked through).
-Cast: 3 to 6 people the story should be told through, by one of their comments. Prefer people with standing: the poster, people who say they built, work at, or used the thing, and the sharpest critics. "who" uses only what they say about themselves or what they argue ("a critic of the benchmark", "says they maintain a fork"). Never guess gender.
-Moments: 3 comments that turned the conversation: a correction, an insider detail, a sharp objection, a funny or telling line.
+Cast: 3 to 6 people the story should be told through, by one of their comments. Prefer people with standing: the poster, people who say they built, work at, or used the thing, and the sharpest critics. "who" uses only what they say about themselves or what they argue ("a critic of the benchmark", "says they maintain a fork").
+Moments: the 3 best lines in the thread: the funniest, the sharpest, the most human, or the one that ended an argument. Prefer lines a reader would repeat to a friend.
 Only use comment ids that appear in the thread.`;
 
 /** The thread as the editor reads it: the story, then each comment cut short. */
@@ -81,14 +85,11 @@ function briefing(thread: Thread): string {
     "",
     "Comments: [id] author (depth): text",
   ];
-  let size = lines.join("\n").length;
-  for (const id of thread.order) {
+  // Over budget, the editor sees the busiest conversations from the top down (as the writer does).
+  for (const id of selectComments(thread, THREAD_CHARS, COMMENT_CHARS)) {
     const c = thread.comments[id];
     const text = plainText(c.html).replace(/\s+/g, " ");
-    const line = `[${c.id}] ${c.author} (${c.depth}): ${text.length > COMMENT_CHARS ? `${text.slice(0, COMMENT_CHARS)}…` : text}`;
-    if (size + line.length > THREAD_CHARS) break;
-    lines.push(line);
-    size += line.length + 1;
+    lines.push(`[${c.id}] ${c.author} (${c.depth}): ${text.length > COMMENT_CHARS ? `${text.slice(0, COMMENT_CHARS)}…` : text}`);
   }
   return lines.join("\n");
 }
@@ -99,6 +100,7 @@ function fallback(thread: Thread): EditorNotes {
     shape: "explainer",
     angle: thread.story.title,
     headline: thread.story.title,
+    hook: "",
     cast: [],
     moments: [],
     image: { use: "search", kind: "screenshot", queries: [thread.story.title] },
@@ -140,6 +142,7 @@ export async function planEdition(thread: Thread): Promise<EditorNotes> {
       shape: SHAPES.includes(json.shape as Shape) ? (json.shape as Shape) : "explainer",
       angle: String(json.angle ?? thread.story.title),
       headline: String(json.headline ?? thread.story.title),
+      hook: String(json.hook ?? ""),
       cast,
       moments,
       image:

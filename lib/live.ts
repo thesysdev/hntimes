@@ -4,7 +4,7 @@ import {
   type EditionRecord,
   keys,
   loadEdition,
-  loadRunThread,
+  loadRunView,
   LOCK_TTL,
   type Run,
   saveEdition,
@@ -14,6 +14,8 @@ import {
 import { type EditionEvent, writeEdition } from "./generate";
 import type { Story } from "./hn";
 import { getStore } from "./store";
+import { editionView, writerView } from "./thread-view";
+import { getCommentTimeline } from "./tools";
 
 // One writer per story, everyone else watching. The first visitor to need a new edition takes the
 // story's lock and starts writing; the run's events go to a shared list as they happen. Every
@@ -69,8 +71,9 @@ async function write(story: Story, final: boolean, run: string): Promise<void> {
 
   const emit = (event: EditionEvent) => {
     if (event.type === "thread") {
-      // The thread can run to a megabyte: it goes to blob storage, and the list just says it's there.
-      const saved = saveRunThread(story.id, run, event.thread);
+      // Threads run to megabytes: they go to blob storage, and the list just says they're there.
+      // Visitors get the writer's view, the only comments the edition can refer to.
+      const saved = saveRunThread(story.id, run, event.thread, writerView(event.thread));
       threadSaved.push(saved);
       void saved.then(() => pending.push(JSON.stringify({ type: "thread-ready" })));
       return;
@@ -82,9 +85,11 @@ async function write(story: Story, final: boolean, run: string): Promise<void> {
     const written = await writeEdition({ id: String(story.id), emit });
     await Promise.all(threadSaved);
     const writtenAt = Date.now();
+    const program = bareProgram(written.program);
     await saveEdition(story.id, {
-      program: bareProgram(written.program),
-      thread: written.thread,
+      program,
+      thread: editionView(written.thread, program),
+      timeline: getCommentTimeline(written.thread, { id: story.id }).comments,
       model: written.label,
       writtenAt,
       storyAge: Math.round(writtenAt / 1000 - story.time),
@@ -127,7 +132,7 @@ export async function* follow(id: number, run: string, signal: AbortSignal): Asy
     for (const item of items) {
       const event = JSON.parse(item) as { type: string };
       if (event.type === "thread-ready") {
-        const thread = await loadRunThread(id, run);
+        const thread = await loadRunView(id, run);
         if (thread) yield { type: "thread", thread };
         continue;
       }

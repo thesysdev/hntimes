@@ -271,6 +271,8 @@
 
 /* For the record: the claim struck through in grey, the correction in full ink beneath it. */
 .correction {
+  /* Quoted comments can carry long URLs: break them inside the box. */
+  overflow-wrap: anywhere;
   margin: var(--block-gap) 0;
   padding: var(--space-4) var(--space-5) var(--space-5);
   background: var(--paper-2);
@@ -300,15 +302,14 @@
 
 .claim {
   color: var(--ink-3);
-  text-decoration: line-through;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 1.5px;
   line-height: 1.45;
   margin-bottom: var(--space-4);
 }
 
-.claim .claimLabel {
-  text-decoration: none;
+.claimText {
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
 }
 
 .fixQuote {

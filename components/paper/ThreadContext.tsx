@@ -17,7 +17,3 @@ export function useThread(): Thread {
   return thread;
 }
 
-/** The thread, or null outside a ThreadProvider (the front page's map has no thread to quote). */
-export function useOptionalThread(): Thread | null {
-  return useContext(ThreadContext);
-}

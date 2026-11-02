@@ -51,13 +51,18 @@ export function ThreadMap({
   // The scale starts where the conversation does, not at the post: a resubmitted story keeps its old
   // post time (often with a stray early comment), and its conversation would otherwise be squeezed
   // against the right edge. The 5th percentile ignores those strays; they sit at the left edge.
+  // Likewise the end: a long tail of late replies (a big thread runs on for days) would squeeze
+  // the conversation into the left edge, so the scale stops at the 98th percentile and the last
+  // few stragglers sit at the right edge.
   const times = comments.map((c) => c.hours).sort((a, b) => a - b);
   const start = times[Math.floor(times.length * 0.05)];
-  const span = Math.max(times[times.length - 1] - start, 0.25);
+  const end = times[Math.floor((times.length - 1) * 0.98)];
+  const span = Math.max(end - start, 0.25);
+  const lasted = times[times.length - 1] - times[0];
   const maxDepth = Math.max(...comments.map((c) => c.depth));
   const topLevel = comments.filter((c) => c.depth === 0).length;
   // Linear time: equal widths are equal stretches of time.
-  const x = (hours: number) => PAD_X + (Math.max(0, hours - start) / span) * (WIDTH - PAD_X * 2);
+  const x = (hours: number) => PAD_X + (Math.min(Math.max(0, hours - start), span) / span) * (WIDTH - PAD_X * 2);
   const row = Math.min(MAX_ROW, (HEIGHT - PAD_TOP * 2 - AXIS) / Math.max(1, maxDepth));
   const y = (depth: number) => PAD_TOP + depth * row;
 
@@ -80,7 +85,8 @@ export function ThreadMap({
     x: x(start + h),
     label: `${relative}${hoursLabel(h)}`,
   }));
-  const duration = span < 36 ? `${Math.max(1, Math.round(span))} hours` : `${Math.round(span / 24)} days`;
+  // The caption tells the whole story, tail included.
+  const duration = lasted < 36 ? `${Math.max(1, Math.round(lasted))} hours` : `${Math.round(lasted / 24)} days`;
 
   return (
     <figure className={styles.map}>
