@@ -11,7 +11,7 @@ import { CACHE_VERSION } from "./version";
 // - Articles fetched through Exa: forever.
 // - Editions, by the story's age:
 //     under 1 hour   not written: the story is still building
-//     below 100 points or 5 comments: not written (come back later, or never once it's settled)
+//     below the bar (5 comments, and 10 points or 100 once settled): not written
 //     1 to 24 hours  written, then rewritten when the edition is more than 6 hours old
 //     over 24 hours  written once more after the 24-hour mark, then frozen for good
 // - Every edition ever written is kept, as a version; the newest is the one served.
@@ -27,11 +27,15 @@ export const FROZEN_AFTER = 24 * HOUR;
 /** How long an edition of a story that's still developing is served before it's rewritten. */
 export const DEVELOPING_TTL = 6 * HOUR;
 /**
- * Stories need this many points and comments to be worth an edition (and an LLM call). The points
- * bar bounds the stories anyone can make us write: about 208,000 in HN's history reached 100
- * points (counted on Algolia, November 2026).
+ * Stories need this many points and comments to be worth an edition (and an LLM call).
+ * - Developing stories (under 24 hours) need only a few points, so the whole live front page is
+ *   covered. That set is small: about 70 to 80 stories a day reach 10 points and 5 comments.
+ * - Settled stories need 100 points. That bounds HN's history, which anyone could otherwise walk
+ *   through id by id: about 208,000 stories ever reached 100 points (counted on Algolia,
+ *   November 2026).
  */
-export const MIN_POINTS = 100;
+export const MIN_POINTS_DEVELOPING = 10;
+export const MIN_POINTS_SETTLED = 100;
 export const MIN_COMMENTS = 5;
 
 const key = (...parts: (string | number)[]) => ["hp", CACHE_VERSION, ...parts].join(":");
@@ -109,8 +113,9 @@ export function decide(record: EditionRecord | null, story: Story | null, now = 
   if (!story) return null;
   const age = now - story.time;
   if (age < BUILDING_UNTIL) return { action: "building", story, readyIn: BUILDING_UNTIL - age };
-  if (story.points < MIN_POINTS || story.comments < MIN_COMMENTS)
-    return record ? { action: "serve", record } : { action: "quiet", story, settled: age >= FROZEN_AFTER };
+  const settled = age >= FROZEN_AFTER;
+  if (story.points < (settled ? MIN_POINTS_SETTLED : MIN_POINTS_DEVELOPING) || story.comments < MIN_COMMENTS)
+    return record ? { action: "serve", record } : { action: "quiet", story, settled };
   if (age >= FROZEN_AFTER) return { action: "write", story, final: true };
   if (record && now - record.writtenAt / 1000 < DEVELOPING_TTL) return { action: "serve", record };
   return { action: "write", story, final: false };

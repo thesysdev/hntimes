@@ -63,8 +63,8 @@ export function StillBuilding({ title, readyIn }: { title: string; /** Seconds u
 }
 
 /**
- * A story below the bar for an edition (100 points and a discussion): not yet, or, once it has
- * settled, not at all.
+ * A story below the bar for an edition (see MIN_POINTS_* in lib/cache.ts): not yet, or, once it
+ * has settled, not at all.
  */
 export function TooQuiet({ title, settled }: { title: string; settled: boolean }) {
   return (
@@ -76,7 +76,7 @@ export function TooQuiet({ title, settled }: { title: string; settled: boolean }
       <p className={styles.dek}>
         {settled
           ? "Hackerpaper covers stories that reached 100 points and drew a discussion. This one didn’t."
-          : "Hackerpaper writes up stories once they reach 100 points and draw a discussion. This one isn’t there yet: come back as it develops."}
+          : "Hackerpaper writes up stories once readers start talking. This one isn’t there yet: come back as it develops."}
       </p>
     </section>
   );
