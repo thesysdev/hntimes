@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FrontPage, FrontPageSkeleton, LeadConversation, Masthead, PaperFrame } from "@/components/paper";
-import { cachedFor, FRONT_PAGE_TTL, keys } from "@/lib/cache";
+import { cachedFor, coverable, FRONT_PAGE_TTL, keys } from "@/lib/cache";
 import { fetchFrontPage, fetchThread } from "@/lib/hn";
 import { plainText } from "@/lib/thread";
 import { getCommentTimeline } from "@/lib/tools";
@@ -22,7 +22,8 @@ async function Stories() {
   await connection();
   // Cached for 15 minutes in production (lib/cache.ts).
   const stories = await cachedFor(keys.frontPage, FRONT_PAGE_TTL, fetchFrontPage);
-  const lead = stories[0];
+  // The lead is the top story with an edition; the front page leaves the rest off (see FrontPage).
+  const lead = stories.find((story) => coverable(story));
   return (
     <FrontPage
       stories={stories}
