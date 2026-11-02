@@ -103,6 +103,20 @@ export type Decision =
   | { action: "quiet"; story: Story; settled: boolean }
   | { action: "write"; story: Story; final: boolean };
 
+/** Below the bar for an edition: too few comments, or too few points for its age. */
+function belowBar(story: Pick<Story, "points" | "comments">, settled: boolean): boolean {
+  return story.points < (settled ? MIN_POINTS_SETTLED : MIN_POINTS_DEVELOPING) || story.comments < MIN_COMMENTS;
+}
+
+/**
+ * Whether a story gets an edition now (written or cached), going by its age, points and comments
+ * alone. The front page uses it to link only stories that have one.
+ */
+export function coverable(story: Pick<Story, "time" | "points" | "comments">, now = Date.now() / 1000): boolean {
+  const age = now - story.time;
+  return age >= BUILDING_UNTIL && !belowBar(story, age >= FROZEN_AFTER);
+}
+
 /**
  * The caching rules for one story. `story` is null when the id isn't an HN story (a comment, job,
  * poll or nothing at all); then there's nothing to write. A frozen edition is served without
@@ -114,8 +128,7 @@ export function decide(record: EditionRecord | null, story: Story | null, now = 
   const age = now - story.time;
   if (age < BUILDING_UNTIL) return { action: "building", story, readyIn: BUILDING_UNTIL - age };
   const settled = age >= FROZEN_AFTER;
-  if (story.points < (settled ? MIN_POINTS_SETTLED : MIN_POINTS_DEVELOPING) || story.comments < MIN_COMMENTS)
-    return record ? { action: "serve", record } : { action: "quiet", story, settled };
+  if (belowBar(story, settled)) return record ? { action: "serve", record } : { action: "quiet", story, settled };
   if (age >= FROZEN_AFTER) return { action: "write", story, final: true };
   if (record && now - record.writtenAt / 1000 < DEVELOPING_TTL) return { action: "serve", record };
   return { action: "write", story, final: false };

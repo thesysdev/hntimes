@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FrontPage, FrontPageSkeleton, LeadConversation, Masthead, PaperFrame } from "@/components/paper";
-import { cachedFor, FRONT_PAGE_TTL, keys } from "@/lib/cache";
+import { cachedFor, coverable, FRONT_PAGE_TTL, keys } from "@/lib/cache";
 import { fetchFrontPage, fetchThread } from "@/lib/hn";
 import { plainText } from "@/lib/thread";
 import { getCommentTimeline } from "@/lib/tools";
@@ -30,7 +30,7 @@ async function Stories() {
         lead && (
           // The lead's thread can run to hundreds of comments: it streams in after the headlines.
           <Suspense fallback={null}>
-            <Lead id={lead.id} />
+            <Lead id={lead.id} covered={coverable(lead)} />
           </Suspense>
         )
       }
@@ -39,9 +39,9 @@ async function Stories() {
 }
 
 /** The lead story's thread map and most-replied top-level comment; nothing if the thread can't be read. */
-async function Lead({ id }: { id: number }) {
+async function Lead({ id, covered }: { id: number; covered: boolean }) {
   const lead = await cachedFor(`${keys.frontPage}:lead:${id}`, FRONT_PAGE_TTL, () => leadConversation(id));
-  return lead && <LeadConversation id={id} comments={lead.comments} top={lead.top} />;
+  return lead && <LeadConversation id={id} comments={lead.comments} top={lead.top} covered={covered} />;
 }
 
 async function leadConversation(id: number) {
