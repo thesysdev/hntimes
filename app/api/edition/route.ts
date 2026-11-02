@@ -1,21 +1,25 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateSystemPrompt, parseMessage, type LibrarySpec } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import { promptOptions } from "@/components/paper/prompt";
 import spec from "@/generated/library.spec.json";
 import { type EditionImage, fetchArticle, fetchHnThread, searchImages, storyIdFrom } from "@/lib/agent-tools";
-import { isGenericImage, planImageSearch } from "@/lib/image-query";
-import { saveSnapshot } from "@/lib/snapshots";
+import { type EditorNotes, isGenericImage, likelyCast, planEdition } from "@/lib/editor";
+import { fetchEarlierStories, fetchProfiles } from "@/lib/hn";
+import { loadSnapshot, saveSnapshot } from "@/lib/snapshots";
 import { editionPrompt } from "@/lib/thread-prompt";
 
-// The edition agent. Given an HN URL it gathers everything first: the thread, then the article and
-// the image search in parallel. Then it makes one streamed call to OpenUI Cloud Gateway with all of
+// The edition agent. Given an HN URL it gathers everything first: the thread, then in parallel the
+// article, earlier stories from the same site, and an editor's brief (angle, cast, lead art) with
+// the image search it calls for. Then it makes one streamed call to OpenUI Cloud Gateway with all of
 // it in a single prompt. Gateway validates and corrects the OpenUI Lang against the catalog while
 // it streams.
 //
 // The response is NDJSON, one event per line:
 //   {"type":"status","message":"…"}       progress
+//   {"type":"story",…}                    the story's title and size, as soon as the thread is read
+//   {"type":"brief",…}                    the editor's brief: shape, angle, working headline, cast
 //   {"type":"thread","thread":{…}}        the fetched thread, which the page needs to render quotes
 //   {"type":"source",…}                   a source finished (name, ok, size, ms)
 //   {"type":"warning","message":"…"}      an optional source failed (the edition goes on without it)
@@ -126,20 +130,44 @@ export async function POST(request: Request) {
         if (!fetched) throw new Error(`Couldn't load the thread for ${url}.`);
         const { thread } = fetched;
         log(`thread from ${fetched.source}: "${thread.story.title}"`);
+        const { title, author, commentCount } = thread.story;
+        const site = thread.story.url ? new URL(thread.story.url).hostname.replace(/^www\./, "") : null;
+        send({ type: "story", title, author, comments: commentCount, site });
         const storyUrl = thread.story.url;
 
-        // Then, in parallel: the article, and the image search (its queries, then the search).
-        send({ type: "status", message: "Reading the article and finding images…" });
-        const [article, searched] = await Promise.all([
+        // Then, in parallel: the article, earlier stories from the same site, and the editor's
+        // notes (followed by the image search they call for).
+        send({ type: "status", message: "Reading the article and briefing the editor…" });
+        // Profiles of the likely cast load while the editor reads, so only surprises wait for it.
+        const likelyProfiles = fetchProfiles(likelyCast(thread));
+        const [article, earlier, { notes, searched }] = await Promise.all([
           storyUrl
             ? source("fetch_article", "Reading the article…", optional("fetch_article", () => fetchArticle(storyUrl)), (a) => a?.text.length ?? 0)
             : null,
-          source("plan_image", "Choosing the lead art…", () => planImageSearch(thread), (p) => (p.use === "none" ? 0 : 1)).then(
-            (plan): Promise<EditionImage[]> => {
-              log(`image plan: ${JSON.stringify(plan)}`);
-              if (plan.use === "none") return Promise.resolve([]);
-              const query = plan.queries[0];
-              return source("search_images", `Searching for “${query}”…`, () => searchImages(query), (i) => i.length);
+          source("earlier_stories", "Looking up earlier coverage…", optional("earlier_stories", () => fetchEarlierStories(thread.story)), (e) => e?.length ?? 0),
+          source("plan_edition", "Briefing the editor…", () => planEdition(thread), (n) => n.cast.length).then(
+            async (notes): Promise<{ notes: EditorNotes; searched: EditionImage[] }> => {
+              log(`editor: ${JSON.stringify({ ...notes, cast: notes.cast.length, moments: notes.moments.length })}`);
+              send({ type: "brief", shape: notes.shape, angle: notes.angle, headline: notes.headline, cast: notes.cast.map((p) => p.author) });
+              // The cast's profiles and the lead art, in parallel.
+              const query = notes.image.use === "search" ? notes.image.queries[0] : null;
+              const [people, searched] = await Promise.all([
+                source(
+                  "fetch_profiles",
+                  "Checking who the sources are…",
+                  async () => {
+                    const known = await likelyProfiles;
+                    const missing = notes.cast.map((p) => p.author).filter((name) => !known[name]);
+                    const all = { ...known, ...(missing.length ? await fetchProfiles([...new Set(missing)]) : {}) };
+                    const cast = new Set([thread.story.author, ...notes.cast.map((p) => p.author)]);
+                    return Object.fromEntries(Object.entries(all).filter(([name]) => cast.has(name)));
+                  },
+                  (p) => Object.keys(p).length,
+                ),
+                query ? source("search_images", `Searching for “${query}”…`, () => searchImages(query), (i) => i.length) : [],
+              ]);
+              thread.people = people;
+              return { notes, searched };
             },
           ),
         ]);
@@ -157,7 +185,7 @@ export async function POST(request: Request) {
 
         // 2. One streamed call with all of it.
         send({ type: "status", message: `Writing with ${label}…` });
-        const prompt = editionPrompt(thread, article, images);
+        const prompt = editionPrompt(thread, article, images, notes, earlier ?? []);
         log(`prompt: system ${systemPrompt.length} chars, sources ${prompt.length} chars`);
         const gateway = new OpenAI({ apiKey, baseURL: "https://api.thesys.dev/v1/embed" });
         const completion = await gateway.chat.completions.create(
@@ -204,5 +232,27 @@ export async function POST(request: Request) {
 
   return new Response(stream, {
     headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store", "X-Model": label },
+  });
+}
+
+/**
+ * GET /api/edition?id=<story id>, in development only: replays the latest saved run of a story
+ * (runs/ and its snapshot) through the same NDJSON stream, without calling the model, so the
+ * page's design can be reviewed without writing a new edition each time.
+ */
+export async function GET(request: Request) {
+  if (process.env.NODE_ENV !== "development") return Response.json({ error: "Not found" }, { status: 404 });
+  const id = new URL(request.url).searchParams.get("id") ?? "";
+  const thread = await loadSnapshot(id);
+  const runs = (await readdir(path.join(process.cwd(), "runs")).catch(() => [])).filter((f) => f.startsWith(`${id}--`)).sort();
+  if (!thread || runs.length === 0) return Response.json({ error: `No saved run for story ${id}` }, { status: 404 });
+  const program = await readFile(path.join(process.cwd(), "runs", runs[runs.length - 1]), "utf8");
+  const events = [
+    { type: "thread", thread },
+    { type: "text", delta: program },
+    { type: "done", model: `replay of ${runs[runs.length - 1]}`, ms: 0, firstTokenMs: 0 },
+  ];
+  return new Response(events.map((e) => `${JSON.stringify(e)}\n`).join(""), {
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" },
   });
 }

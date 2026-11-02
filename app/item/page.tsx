@@ -17,8 +17,10 @@ export default function Item({ searchParams }: { searchParams: SearchParams }) {
 }
 
 async function Edition({ searchParams }: { searchParams: SearchParams }) {
-  const { id } = await searchParams;
+  const { id, replay } = await searchParams;
   if (typeof id !== "string" || !/^\d+$/.test(id)) notFound();
-  // Keyed by story, so moving between items starts a fresh edition.
-  return <LiveEdition key={id} storyId={id} />;
+  // Keyed by story, so moving between items starts a fresh edition. ?replay (development only)
+  // shows the latest saved run instead of writing a new one.
+  const replaying = process.env.NODE_ENV === "development" && replay !== undefined;
+  return <LiveEdition key={id} storyId={id} replay={replaying} />;
 }

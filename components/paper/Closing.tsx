@@ -1,6 +1,7 @@
 import { getComment, hnItemUrl } from "@/lib/thread";
 import { useThread } from "./ThreadContext";
 import styles from "./Closing.module.css";
+import { LinkNames } from "./Handle";
 
 /** Questions the thread raised and didn't settle, each tied to the comment that raised it. */
 export function OpenQuestions({ items }: { items: { question: string; id: number }[] }) {
@@ -9,9 +10,11 @@ export function OpenQuestions({ items }: { items: { question: string; id: number
   if (valid.length === 0) return null;
   return (
     <ul className={styles.questions}>
-      {valid.map(({ question, id }) => (
-        <li key={id}>
-          <span className={styles.question}>{question}</span>{" "}
+      {valid.map(({ question, id }, i) => (
+        <li key={`${id}-${i}`}>
+          <span className={styles.question}>
+            <LinkNames text={question} />
+          </span>{" "}
           <a href={hnItemUrl(id)} className={styles.raisedBy}>
             raised by {getComment(thread, id)!.author}
           </a>
@@ -56,7 +59,9 @@ export function ReadingList({ groups }: { groups: { title: string; items: Resour
                   <span className={styles.name}>
                     {item.url ? <a href={item.url}>{item.name}</a> : item.name}
                   </span>
-                  <span className={styles.note}>{item.note}</span>
+                  <span className={styles.note}>
+                    <LinkNames text={item.note} />
+                  </span>
                   <span className={styles.mentions}>
                     {item.ids.map((id, i) => (
                       <a key={id} href={hnItemUrl(id)}>
@@ -84,7 +89,7 @@ export function Colophon() {
         verbatim and link to their source on Hacker News. Notes marked ◆ are added context, not from the
         thread.
       </p>
-      <p>This edition was set by hand as a design preview. Generated editions will be composed with OpenUI.</p>
+      <p>Written by a language model from the thread and the article, and composed with OpenUI.</p>
     </footer>
   );
 }

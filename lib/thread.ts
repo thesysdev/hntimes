@@ -22,6 +22,8 @@ export type Thread = {
     topLevelCount: number;
   };
   article: { url: string; text: string } | null;
+  /** HN profiles of the people the edition is told through, by username. */
+  people?: Record<string, { karma: number; about: string }>;
   comments: Record<string, Comment>;
   order: number[];
   links: Record<string, number[]>;
@@ -75,6 +77,10 @@ export function isReplyChain(thread: Thread, ids: number[]): boolean {
 
 export function hnItemUrl(id: number): string {
   return `https://news.ycombinator.com/item?id=${id}`;
+}
+
+export function hnUserUrl(name: string): string {
+  return `https://news.ycombinator.com/user?id=${encodeURIComponent(name)}`;
 }
 
 export function hoursAfterPost(thread: Thread, time: number): number {

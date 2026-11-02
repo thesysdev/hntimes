@@ -1,0 +1,335 @@
+/* Shared box heading: small caps sans over a heavy rule, like the KeyPoints box. */
+.boxTitle {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-4);
+  border-bottom: 2px solid var(--rule-strong);
+}
+
+.source {
+  margin-left: 0.4em;
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 600;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.source:hover {
+  color: var(--accent-ink);
+}
+
+/* By the numbers: big lining figures in a grid that fits whatever width it gets. */
+.facts {
+  container-type: inline-size;
+  margin: var(--block-gap) 0;
+  break-inside: avoid;
+}
+
+.facts dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-5) var(--space-5);
+}
+
+.fact {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-3);
+}
+
+.value {
+  font-size: var(--step-3);
+  font-weight: 700;
+  font-variation-settings: "opsz" 72;
+  font-variant-numeric: lining-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.label {
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* Timeline: times in a narrow column, a hairline running down beside the events. */
+.timeline {
+  margin: var(--block-gap) 0;
+}
+
+.timeline ol {
+  display: grid;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule);
+  line-height: 1.45;
+}
+
+.event:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.when {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+  padding-top: 0.15em;
+}
+
+.what {
+  text-wrap: pretty;
+}
+
+/* Who's talking: each person's handle, then who they are in a line of text. */
+.cast {
+  margin: var(--block-gap) 0;
+  break-inside: avoid;
+}
+
+.cast ul {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.person {
+  display: block;
+  padding-left: var(--space-4);
+  border-left: 3px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.person[data-active] {
+  border-left-color: var(--accent);
+}
+
+.name {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+.op {
+  margin-left: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.karma {
+  margin-left: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-variant-numeric: lining-nums;
+  color: var(--ink-3);
+}
+
+.who {
+  display: block;
+  font-size: var(--step--1);
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/*
+ * Vox pop: a label, the question in italic display type, then the answers in ruled columns, each
+ * signed directly beneath.
+ */
+.vox {
+  container-type: inline-size;
+  margin: var(--block-gap) 0;
+  break-inside: avoid;
+}
+
+.voxLabel {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: var(--space-1);
+}
+
+.voxQuestion {
+  font-size: var(--step-2);
+  font-style: italic;
+  font-weight: 500;
+  font-variation-settings: "opsz" 48;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: var(--space-5);
+}
+
+.vox ul {
+  display: grid;
+  grid-template-columns: repeat(var(--voices, 3), minmax(0, 1fr));
+}
+
+.vox li {
+  padding: 0 var(--space-5);
+  border-left: 1px solid var(--rule);
+}
+
+.vox li:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.vox li:last-child {
+  padding-right: 0;
+}
+
+.voice {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.voiceQuote {
+  font-size: var(--step-0);
+  font-variation-settings: "opsz" 36;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+/* The opening mark in the accent, the one splash of color in the box. */
+.voiceMark {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.voiceQuote:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.2em;
+}
+
+.voiceName {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.voiceName::before {
+  content: "— ";
+  font-weight: 400;
+  color: var(--ink-3);
+}
+
+.voiceName:hover,
+.voice[data-active] .voiceName {
+  color: var(--accent-ink);
+}
+
+/* Narrow: the answers stack, ruled between. */
+@container (max-width: 36rem) {
+  .vox ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .vox li {
+    padding: var(--space-4) 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .vox li:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* For the record: the claim struck through in grey, the correction in full ink beneath it. */
+.correction {
+  margin: var(--block-gap) 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  background: var(--paper-2);
+  break-inside: avoid;
+}
+
+.correction .boxTitle {
+  border-bottom-width: 1px;
+}
+
+.claimLabel {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.claimLabel .name {
+  font-size: inherit;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.claim {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  line-height: 1.45;
+  margin-bottom: var(--space-4);
+}
+
+.claim .claimLabel {
+  text-decoration: none;
+}
+
+.fixQuote {
+  display: block;
+  font-size: var(--step-0);
+  font-variation-settings: "opsz" 36;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+/* In the narrow sidebar, the timeline tightens to the sidebar's own text size. */
+@container (max-width: 26rem) {
+  .event {
+    grid-template-columns: 5rem 1fr;
+    gap: var(--space-3);
+    font-size: var(--step--1);
+  }
+
+  .value {
+    font-size: var(--step-2);
+  }
+}

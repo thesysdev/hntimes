@@ -1,0 +1,22 @@
+/* A username in running text: the sans at a touch under text size, like a newspaper's agate credit. */
+.handle {
+  font-family: var(--font-ui);
+  font-size: 0.86em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  /* A handle is a name: never hyphenated or broken across lines. */
+  hyphens: none;
+  white-space: nowrap;
+  transition: text-decoration-color 150ms ease, color 150ms ease;
+}
+
+.handle:hover,
+[data-active] > .handle {
+  color: var(--accent-ink);
+  text-decoration-color: currentColor;
+}

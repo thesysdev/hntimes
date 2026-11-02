@@ -46,8 +46,19 @@ for (const el of elements.filter((e) => e.typeName === "Quote" || e.typeName ===
   if (excerpt && !fold(plain(comment.html)).includes(fold(excerpt)))
     problems.push({ code: "not-verbatim", message: `${el.typeName}(${id}) by ${comment.author}: "${excerpt}"` });
 }
-for (const el of elements.filter((e) => e.typeName === "Question")) {
-  if (!thread.comments[el.props.id]) problems.push({ code: "unknown-comment", message: `Question(${el.props.id})` });
+for (const el of elements.filter((e) => ["Question", "Person", "Fact", "Event"].includes(e.typeName))) {
+  const { id } = el.props;
+  if (id !== undefined && !thread.comments[id]) problems.push({ code: "unknown-comment", message: `${el.typeName}(${id})` });
+}
+
+// Text with cite slots and @handles: every {n} needs its Quote, every @name must be in the thread.
+const people = new Set([thread.story.author, ...Object.values(thread.comments).map((c) => c.author)]);
+for (const el of elements.filter((e) => e.typeName === "Prose" || e.typeName === "Lede")) {
+  const { text = "", cites = [] } = el.props;
+  for (const [, n] of text.matchAll(/\{(\d+)\}/g))
+    if (!cites[Number(n) - 1]) problems.push({ code: "empty-slot", message: `${el.typeName}: {${n}} has no cite` });
+  for (const [, name] of text.matchAll(/@([\w-]+)/g))
+    if (!people.has(name)) problems.push({ code: "unknown-handle", message: `${el.typeName}: @${name} is not in the thread` });
 }
 // Every edition needs the thread map (its quoted dots are derived from the program, so no list to check).
 if (!elements.some((e) => e.typeName === "ThreadMap"))

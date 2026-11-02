@@ -35,17 +35,19 @@ export function HighlightTarget({
   className,
   inline = false,
   children,
+  ...rest
 }: {
   id: number;
   className?: string;
   /** Render as a span, for targets inside a paragraph. */
   inline?: boolean;
   children: React.ReactNode;
-}) {
+} & { [data: `data-${string}`]: string | boolean | undefined }) {
   const { active, setActive } = useHighlight();
   const Tag = inline ? "span" : "div";
   return (
     <Tag
+      {...rest}
       className={className}
       data-active={active === id || undefined}
       onMouseEnter={() => setActive(id)}

@@ -1,4 +1,6 @@
-import { hnItemUrl } from "@/lib/thread";
+import { hnItemUrl, hnUserUrl } from "@/lib/thread";
+import type { QuoteRef } from "./Quote";
+import { weave } from "./Section";
 import { useThread } from "./ThreadContext";
 import styles from "./Headline.module.css";
 
@@ -25,7 +27,8 @@ export function Headline({ kicker, title, dek }: HeadlineProps) {
       <p className={styles.dek}>{dek}</p>
       <div className={styles.byline}>
         <p className={styles.bylineName}>
-          From a <a href={hnItemUrl(story.id)}>Hacker News thread</a> started by {story.author}
+          From a <a href={hnItemUrl(story.id)}>Hacker News thread</a> started by{" "}
+          <a href={hnUserUrl(story.author)}>{story.author}</a>
         </p>
         <p className={styles.bylineMeta}>
           {newspaperDate(story.time)} · {story.points.toLocaleString("en-US")} points ·{" "}
@@ -36,9 +39,10 @@ export function Headline({ kicker, title, dek }: HeadlineProps) {
   );
 }
 
-export function Lede({ children }: { children: React.ReactNode }) {
+/** The opening paragraph. Like Prose, it may weave in cited excerpts at `{1}`, `{2}`… */
+export function Lede({ text, cites = [] }: { text: string; cites?: QuoteRef[] }) {
   return (
     // One column, across the story: the opening paragraph should read in one go.
-    <p className={styles.lede}>{children}</p>
+    <p className={styles.lede}>{weave(text, cites)}</p>
   );
 }

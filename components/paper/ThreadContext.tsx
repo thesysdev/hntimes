@@ -16,3 +16,8 @@ export function useThread(): Thread {
   if (!thread) throw new Error("Paper components must render inside <ThreadProvider>");
   return thread;
 }
+
+/** The thread, or null outside a ThreadProvider (the front page's map has no thread to quote). */
+export function useOptionalThread(): Thread | null {
+  return useContext(ThreadContext);
+}

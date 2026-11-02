@@ -4,6 +4,7 @@ import {
   formatElapsed,
   getComment,
   hnItemUrl,
+  hnUserUrl,
   hoursAfterPost,
   isReplyChain,
   isVerbatim,
@@ -31,7 +32,9 @@ function Byline({ thread, comment }: { thread: Thread; comment: Comment }) {
   const isOp = comment.author === thread.story.author;
   return (
     <span className={styles.byline}>
-      <span className={styles.author}>{comment.author}</span>
+      <a className={styles.author} href={hnUserUrl(comment.author)}>
+        {comment.author}
+      </a>
       {isOp && <span className={styles.op}>author</span>}
       {parent && <span className={styles.meta}>replying to {parent.author}</span>}
       <a className={styles.meta} href={hnItemUrl(comment.id)}>
@@ -47,7 +50,8 @@ export function PullQuote({ id, excerpt }: QuoteRef) {
   const comment = getComment(thread, id);
   if (!comment) return null;
   return (
-    <HighlightTarget id={id} className={styles.pull}>
+    // data-pull: placed between sections, the quote breaks out across the story (Paper.module.css).
+    <HighlightTarget id={id} className={styles.pull} data-pull>
       <figure>
         <blockquote>
           {quotedText(comment, excerpt).map((p, i) => (
@@ -87,33 +91,48 @@ export function Exchange({ quotes }: { quotes: QuoteRef[] }) {
 }
 
 /**
- * A commenter's words woven into the editor's paragraph: the excerpt in quotation marks with a
- * small credit linking to the comment. Renders nothing unless the excerpt is verbatim, so a
- * paragraph can never put words in someone's mouth.
+ * A commenter's words woven into the editor's paragraph: the excerpt in quotation marks, linked to
+ * the comment. When the paragraph doesn't name the commenter, a small credit follows. Renders
+ * nothing unless the excerpt is verbatim, so a paragraph can never put words in someone's mouth.
  */
-export function Cite({ id, excerpt }: QuoteRef) {
+export function Cite({ id, excerpt, paragraph = "" }: QuoteRef & { paragraph?: string }) {
   const thread = useThread();
   const comment = getComment(thread, id);
   if (!comment || !excerpt || !isVerbatim(plainText(comment.html), excerpt)) return null;
+  const named = paragraph.includes(comment.author);
   return (
     <HighlightTarget id={id} inline className={styles.cite}>
-      “{excerpt}”
-      <a href={hnItemUrl(id)} className={styles.citeCredit}>
-        {comment.author}
+      <a href={hnItemUrl(id)} className={styles.citeQuote} title={`${comment.author}'s comment on Hacker News`}>
+        “{excerpt}”
       </a>
+      {!named && (
+        <a href={hnUserUrl(comment.author)} className={styles.citeCredit}>
+          {comment.author}
+        </a>
+      )}
     </HighlightTarget>
   );
 }
 
-/** A short attributed excerpt, used inside other components. */
+/** A comment's opening, cut at a sentence end near `max` characters, for quotes given without an excerpt. */
+function opening(comment: Comment, max = 220): string {
+  const text = paragraphs(comment.html).join(" ");
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const stop = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "));
+  return stop > max / 3 ? cut.slice(0, stop + 1) : `${cut.replace(/\s+\S*$/, "")}…`;
+}
+
+/** A short attributed excerpt, used inside other components. Without a verbatim excerpt, the comment's opening. */
 export function Citation({ id, excerpt }: QuoteRef) {
   const thread = useThread();
   const comment = getComment(thread, id);
   if (!comment) return null;
+  const text = excerpt && isVerbatim(plainText(comment.html), excerpt) ? excerpt : opening(comment);
   return (
     <HighlightTarget id={id} className={styles.citation}>
-      <p>{quotedText(comment, excerpt).join(" ")}</p>
-      <a href={hnItemUrl(id)} className={styles.citationAuthor}>
+      <p>{text}</p>
+      <a href={hnUserUrl(comment.author)} className={styles.citationAuthor}>
         {comment.author}
       </a>
     </HighlightTarget>

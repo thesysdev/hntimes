@@ -35,13 +35,9 @@ export async function fetchArticle(url: string): Promise<Article | null> {
  * Images for the edition: each with a src the page can load, a credit and what it shows.
  * Real: OpenUI Cloud's standalone image search endpoint (details pending).
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- the query is for the real endpoint
 export async function searchImages(query: string): Promise<EditionImage[]> {
-  // Placeholder until image search is connected: one stand-in image, whatever the query.
-  return [
-    {
-      src: "/art/placeholder.svg",
-      credit: "Placeholder image",
-      shows: `A stand-in for lead art matching "${query}" (image search is not connected yet).`,
-    },
-  ];
+  // Not connected yet. Returns nothing rather than a stand-in, so editions without an article image
+  // run without lead art instead of printing a placeholder.
+  return [];
 }

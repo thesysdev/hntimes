@@ -1,8 +1,14 @@
-/* A slim control strip under the masthead: tooling, not part of the paper. */
+/*
+ * A slim control strip under the masthead: tooling, not part of the paper. One line at a fixed
+ * height, so status updates during streaming never push the paper down.
+ */
 .bar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 2.75rem;
+  align-items: center;
   gap: var(--space-2) var(--space-4);
   margin: calc(-1 * var(--space-6)) 0 var(--space-6);
   padding: var(--space-2) 0;

@@ -56,6 +56,21 @@
     "ReadingList": {
       "$ref": "#/$defs/ReadingList"
     },
+    "FactBox": {
+      "$ref": "#/$defs/FactBox"
+    },
+    "Timeline": {
+      "$ref": "#/$defs/Timeline"
+    },
+    "Cast": {
+      "$ref": "#/$defs/Cast"
+    },
+    "VoxPop": {
+      "$ref": "#/$defs/VoxPop"
+    },
+    "Correction": {
+      "$ref": "#/$defs/Correction"
+    },
     "Quote": {
       "$ref": "#/$defs/Quote"
     },
@@ -73,6 +88,15 @@
     },
     "ResourceGroup": {
       "$ref": "#/$defs/ResourceGroup"
+    },
+    "Fact": {
+      "$ref": "#/$defs/Fact"
+    },
+    "Event": {
+      "$ref": "#/$defs/Event"
+    },
+    "Person": {
+      "$ref": "#/$defs/Person"
     }
   },
   "required": [
@@ -94,12 +118,20 @@
     "KeyPoints",
     "OpenQuestions",
     "ReadingList",
+    "FactBox",
+    "Timeline",
+    "Cast",
+    "VoxPop",
+    "Correction",
     "Quote",
     "Term",
     "Side",
     "Question",
     "Resource",
-    "ResourceGroup"
+    "ResourceGroup",
+    "Fact",
+    "Event",
+    "Person"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -214,6 +246,21 @@
               },
               {
                 "$ref": "#/$defs/Section"
+              },
+              {
+                "$ref": "#/$defs/PullQuote"
+              },
+              {
+                "$ref": "#/$defs/FactBox"
+              },
+              {
+                "$ref": "#/$defs/Positions"
+              },
+              {
+                "$ref": "#/$defs/VoxPop"
+              },
+              {
+                "$ref": "#/$defs/Correction"
               }
             ]
           }
@@ -223,7 +270,7 @@
         "blocks"
       ],
       "additionalProperties": false,
-      "description": "The main story: an optional LeadArt, a Lede, then Sections."
+      "description": "The main story: an optional LeadArt, a Lede, then Sections. A PullQuote, FactBox, Positions, VoxPop or Correction placed between Sections breaks out across the full width of the story."
     },
     "LeadArt": {
       "type": "object",
@@ -251,13 +298,35 @@
       "properties": {
         "text": {
           "type": "string"
+        },
+        "cites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Quote"
+          }
         }
       },
       "required": [
         "text"
       ],
       "additionalProperties": false,
-      "description": "The opening paragraph of the story, set large with a drop cap. 3 to 5 sentences."
+      "description": "The opening paragraph of the story, set large with a drop cap. 2 to 4 sentences. Like Prose, it may quote a commenter at {1}."
+    },
+    "Quote": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "excerpt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
     },
     "Section": {
       "type": "object",
@@ -298,6 +367,21 @@
               },
               {
                 "$ref": "#/$defs/ReadingList"
+              },
+              {
+                "$ref": "#/$defs/FactBox"
+              },
+              {
+                "$ref": "#/$defs/Timeline"
+              },
+              {
+                "$ref": "#/$defs/Cast"
+              },
+              {
+                "$ref": "#/$defs/VoxPop"
+              },
+              {
+                "$ref": "#/$defs/Correction"
               }
             ]
           }
@@ -334,22 +418,6 @@
       ],
       "additionalProperties": false,
       "description": "A paragraph in the editor's voice: report and paraphrase, the way a newspaper does. Plain text, no markdown. To quote a commenter, write {1}, {2}… where their words go and list the Quotes in cites (each excerpt a short phrase or sentence); the page prints the excerpt in quotation marks with the commenter's name. Never type quoted words or quotation marks around someone's words yourself. Terms are marked inline and defined after the paragraph."
-    },
-    "Quote": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "excerpt": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id"
-      ],
-      "additionalProperties": false,
-      "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
     },
     "Term": {
       "type": "object",
@@ -592,6 +660,160 @@
       "additionalProperties": false,
       "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
     },
+    "FactBox": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fact"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "facts"
+      ],
+      "additionalProperties": false,
+      "description": "Large figures that carry the story (\"By the numbers\"), 2 to 4 Facts. Only for stories with real numbers in the article or thread."
+    },
+    "Fact": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "id": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give the comment id when it comes from the thread."
+    },
+    "Timeline": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "events"
+      ],
+      "additionalProperties": false,
+      "description": "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time."
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "when": {
+          "type": "string"
+        },
+        "what": {
+          "type": "string"
+        },
+        "id": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "when",
+        "what"
+      ],
+      "additionalProperties": false,
+      "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give the comment id when the thread is the source."
+    },
+    "Cast": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "people": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Person"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "people"
+      ],
+      "additionalProperties": false,
+      "description": "The people the story is told through (\"Who's talking\"), 3 to 6 People, as named in the story."
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "who": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "who"
+      ],
+      "additionalProperties": false,
+      "description": "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves."
+    },
+    "VoxPop": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Quote"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "quotes"
+      ],
+      "additionalProperties": false,
+      "description": "Three or four short reactions from different readers, side by side (\"What readers said\"). Each Quote needs an excerpt of one sentence or less: the sharpest, funniest or most telling lines, not arguments."
+    },
+    "Correction": {
+      "type": "object",
+      "properties": {
+        "claim": {
+          "type": "string"
+        },
+        "quote": {
+          "$ref": "#/$defs/Quote"
+        }
+      },
+      "required": [
+        "claim",
+        "quote"
+      ],
+      "additionalProperties": false,
+      "description": "\"For the record\": a statement of fact that turned out wrong, from the article or a commenter, in your words and without saying who corrected it (claim), and the correcting comment with its key sentence as excerpt (quote). Only when the thread really corrects a fact, not for disagreements."
+    },
     "Sidebar": {
       "type": "object",
       "properties": {
@@ -601,6 +823,18 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/KeyPoints"
+              },
+              {
+                "$ref": "#/$defs/Cast"
+              },
+              {
+                "$ref": "#/$defs/FactBox"
+              },
+              {
+                "$ref": "#/$defs/Timeline"
+              },
+              {
+                "$ref": "#/$defs/Correction"
               },
               {
                 "$ref": "#/$defs/Section"
@@ -613,7 +847,7 @@
         "blocks"
       ],
       "additionalProperties": false,
-      "description": "The column beside the story: KeyPoints, then Sections for open questions and reading."
+      "description": "The column beside the story: KeyPoints or a Cast first, then boxes and Sections for open questions and reading."
     },
     "Colophon": {
       "type": "object",

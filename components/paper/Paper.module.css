@@ -77,6 +77,41 @@
   }
 }
 
+/*
+ * Breakouts: a pull quote, figures or a debate placed between sections rather than inside one.
+ * They interrupt the columns the way a display quote or a graphic does in print.
+ */
+.sheet [data-slot="story"] > :is([data-pull], [data-box], [data-linear="full"]) {
+  margin: var(--section-gap) 0 0;
+  padding-top: var(--rule-gap);
+  border-top: 2px solid var(--rule-strong);
+}
+
+.sheet [data-slot="story"] > [data-pull] {
+  padding: var(--space-6) 0 var(--space-5);
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+}
+
+/* Between sections the short rule above a pull quote would double the full one. */
+.sheet [data-slot="story"] > [data-pull]::before {
+  display: none;
+}
+
+.sheet [data-slot="story"] > [data-pull] blockquote {
+  font-size: var(--step-3);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.2;
+  text-wrap: balance;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.sheet [data-slot="story"] > [data-pull] figcaption > * {
+  justify-content: center;
+}
+
 @media (min-width: 1081px) {
   .sheet {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);

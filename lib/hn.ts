@@ -1,4 +1,4 @@
-import type { Comment, Thread } from "./thread";
+import { plainText, type Comment, type Thread } from "./thread";
 
 // Fetches a Hacker News thread and normalizes it into a Thread.
 // Source: HN's public Algolia API (free, no key), which returns the whole tree in one request.
@@ -123,4 +123,79 @@ export async function fetchFrontPage(): Promise<FrontPageStory[]> {
 /** The thread for an HN story id, from Algolia. */
 export async function fetchThread(id: string): Promise<{ thread: Thread; source: "algolia" }> {
   return { thread: normalize(await fromAlgolia(id)), source: "algolia" };
+}
+
+export type EarlierStory = { id: number; title: string; points: number; comments: number; time: number };
+
+/**
+ * Hosts shared by unrelated projects, where "earlier stories from this site" would mean nothing;
+ * for these the search narrows to the first path segment (github.com/<owner>).
+ */
+const SHARED_HOSTS = new Set(["github.com", "gitlab.com", "codeberg.org", "medium.com", "substack.com", "dev.to"]);
+/** Hosts so broad that even narrowed they say nothing about the story. */
+const SKIPPED_HOSTS = new Set(["youtube.com", "youtu.be", "twitter.com", "x.com", "arxiv.org", "en.wikipedia.org", "news.ycombinator.com"]);
+
+/**
+ * Earlier HN stories from the same site (or the same GitHub owner), most discussed first, so the
+ * edition can say what readers have said about it before. Empty for text posts and broad hosts.
+ */
+export async function fetchEarlierStories(story: Thread["story"]): Promise<EarlierStory[]> {
+  if (!story.url) return [];
+  const url = new URL(story.url);
+  const host = url.hostname.replace(/^www\./, "");
+  if (SKIPPED_HOSTS.has(host)) return [];
+  const owner = url.pathname.split("/")[1];
+  const site = SHARED_HOSTS.has(host) ? (owner ? `${host}/${owner}` : null) : host;
+  if (!site) return [];
+
+  const query = new URLSearchParams({
+    query: site,
+    restrictSearchableAttributes: "url",
+    tags: "story",
+    numericFilters: "num_comments>=20",
+    hitsPerPage: "20",
+  });
+  const { hits } = await getJson<{ hits: AlgoliaHit[] }>(`https://hn.algolia.com/api/v1/search?${query}`);
+  return hits
+    .filter((h) => Number(h.objectID) !== story.id && h.url?.includes(site))
+    .map((h) => ({
+      id: Number(h.objectID),
+      title: h.title,
+      points: h.points ?? 0,
+      comments: h.num_comments ?? 0,
+      time: h.created_at_i,
+    }))
+    .sort((a, b) => b.comments - a.comments)
+    .slice(0, 5);
+}
+
+export type Profile = { karma: number; about: string };
+
+/** How much of a profile's "about" the edition sees: enough for a job title or a project. */
+const ABOUT_CHARS = 240;
+
+/**
+ * A commenter's HN profile (karma and what they say about themselves), or null if it can't be
+ * read. Contact details are cut from the about text: the edition only needs a person's standing.
+ */
+export async function fetchProfile(name: string): Promise<Profile | null> {
+  try {
+    const user = await getJson<{ karma?: number; about?: string | null }>(
+      `https://hn.algolia.com/api/v1/users/${encodeURIComponent(name)}`,
+    );
+    const about = plainText(user.about ?? "")
+      .replace(/\S+@\S+/g, "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    return { karma: user.karma ?? 0, about: about.length > ABOUT_CHARS ? `${about.slice(0, ABOUT_CHARS)}…` : about };
+  } catch {
+    return null;
+  }
+}
+
+/** Profiles for several commenters at once, by username; ones that can't be read are left out. */
+export async function fetchProfiles(names: string[]): Promise<Record<string, Profile>> {
+  const profiles = await Promise.all(names.map(async (name) => [name, await fetchProfile(name)] as const));
+  return Object.fromEntries(profiles.filter((entry): entry is [string, Profile] => entry[1] !== null));
 }

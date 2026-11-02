@@ -1,0 +1,122 @@
+/* The developing story: set like the edition's own headline, in draft grey until the brief is in. */
+.dispatch {
+  padding-bottom: var(--space-7);
+  min-height: 60vh;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: var(--space-3);
+}
+
+.pulse {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.title {
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
+  font-weight: 700;
+  font-variation-settings: "opsz" 72;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  max-width: 24ch;
+  margin-bottom: var(--space-4);
+  transition: color 400ms ease;
+}
+
+.title[data-draft] {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.dek {
+  max-width: var(--measure);
+  font-size: var(--step-1);
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-wrap: pretty;
+  margin-bottom: var(--space-5);
+  animation: arrive 400ms ease both;
+}
+
+.steps {
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--measure);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-variant-numeric: lining-nums;
+  line-height: 1.45;
+}
+
+.steps li {
+  position: relative;
+  padding-left: var(--space-5);
+  animation: arrive 300ms ease both;
+}
+
+.done {
+  color: var(--ink-2);
+}
+
+.done::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.now {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.now::before {
+  content: "";
+  position: absolute;
+  left: 0.2rem;
+  top: 0.5em;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse,
+  .now::before,
+  .dek,
+  .steps li {
+    animation: none;
+  }
+}

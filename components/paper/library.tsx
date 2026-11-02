@@ -5,6 +5,7 @@
 import { createLibrary, defineComponent } from "@openuidev/react-lang";
 import { z } from "zod/v4";
 import { ArticleQuote, ArticleSummary } from "./Article";
+import { Cast, Correction, FactBox, Timeline, VoxPop } from "./Boxes";
 import { Colophon, OpenQuestions, ReadingList } from "./Closing";
 import { Headline, Lede } from "./Headline";
 import { Edition, Sidebar, Story } from "./Paper";
@@ -79,6 +80,41 @@ const ResourceGroupPart = defineComponent({
     items: z.array(ResourcePart.ref),
   }),
   description: "A titled group of resources.",
+  component: () => null,
+});
+
+const FactPart = defineComponent({
+  name: "Fact",
+  props: z.object({
+    value: z.string(),
+    label: z.string(),
+    id: z.number().optional(),
+  }),
+  description:
+    'A figure and what it counts ("2 PB", "of data in the warehouse"). It must be stated in the article or a comment; give the comment id when it comes from the thread.',
+  component: () => null,
+});
+
+const EventPart = defineComponent({
+  name: "Event",
+  props: z.object({
+    when: z.string(),
+    what: z.string(),
+    id: z.number().optional(),
+  }),
+  description:
+    'One entry in a Timeline: when it happened ("2021", "March", "9:14 a.m.") and what happened, in one sentence. Give the comment id when the thread is the source.',
+  component: () => null,
+});
+
+const PersonPart = defineComponent({
+  name: "Person",
+  props: z.object({
+    id: z.number(),
+    who: z.string(),
+  }),
+  description:
+    "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves.",
   component: () => null,
 });
 
@@ -200,6 +236,59 @@ const LeadArtBlock = defineComponent({
   component: ({ props }) => <LeadArt src={props.src} caption={props.caption} credit={props.credit} />,
 });
 
+const FactBoxBlock = defineComponent({
+  name: "FactBox",
+  props: z.object({
+    title: z.string(),
+    facts: z.array(FactPart.ref),
+  }),
+  description:
+    'Large figures that carry the story ("By the numbers"), 2 to 4 Facts. Only for stories with real numbers in the article or thread.',
+  component: ({ props }) => <FactBox title={props.title} facts={props.facts.map((f) => f.props)} />,
+});
+
+const TimelineBlock = defineComponent({
+  name: "Timeline",
+  props: z.object({
+    title: z.string(),
+    events: z.array(EventPart.ref),
+  }),
+  description: "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time.",
+  component: ({ props }) => <Timeline title={props.title} events={props.events.map((e) => e.props)} />,
+});
+
+const CastBlock = defineComponent({
+  name: "Cast",
+  props: z.object({
+    title: z.string(),
+    people: z.array(PersonPart.ref),
+  }),
+  description: "The people the story is told through (\"Who's talking\"), 3 to 6 People, as named in the story.",
+  component: ({ props }) => <Cast title={props.title} people={props.people.map((p) => p.props)} />,
+});
+
+const VoxPopBlock = defineComponent({
+  name: "VoxPop",
+  props: z.object({
+    title: z.string(),
+    quotes: z.array(QuotePart.ref),
+  }),
+  description:
+    'Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question ("Why are people still on Ubuntu?"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it.',
+  component: ({ props }) => <VoxPop title={props.title} quotes={props.quotes.map((q) => q.props)} />,
+});
+
+const CorrectionBlock = defineComponent({
+  name: "Correction",
+  props: z.object({
+    claim: z.string(),
+    quote: QuotePart.ref,
+  }),
+  description:
+    '"For the record": a statement of fact that turned out wrong, from the article or a commenter, in your words and without saying who corrected it (claim), and the correcting comment with its key sentence as excerpt (quote). Only when the thread really corrects a fact, not for disagreements.',
+  component: ({ props }) => <Correction claim={props.claim} quote={props.quote.props} />,
+});
+
 const SECTION_BLOCKS = [
   ProseBlock,
   PullQuoteBlock,
@@ -211,6 +300,11 @@ const SECTION_BLOCKS = [
   KeyPointsBlock,
   OpenQuestionsBlock,
   ReadingListBlock,
+  FactBoxBlock,
+  TimelineBlock,
+  CastBlock,
+  VoxPopBlock,
+  CorrectionBlock,
 ] as const;
 
 const SectionBlock = defineComponent({
@@ -259,26 +353,50 @@ const LedeBlock = defineComponent({
   name: "Lede",
   props: z.object({
     text: z.string(),
+    cites: z.array(QuotePart.ref).optional(),
   }),
-  description: "The opening paragraph of the story, set large with a drop cap. 3 to 5 sentences.",
-  component: ({ props }) => <Lede>{props.text}</Lede>,
+  description:
+    "The opening paragraph of the story, set large with a drop cap. 2 to 4 sentences. Like Prose, it may quote a commenter at {1}.",
+  component: ({ props }) => <Lede text={props.text} cites={(props.cites ?? []).map((q) => q.props)} />,
 });
 
 const StoryBlock = defineComponent({
   name: "Story",
   props: z.object({
-    blocks: z.array(z.union([LeadArtBlock.ref, LedeBlock.ref, SectionBlock.ref])),
+    blocks: z.array(
+      z.union([
+        LeadArtBlock.ref,
+        LedeBlock.ref,
+        SectionBlock.ref,
+        PullQuoteBlock.ref,
+        FactBoxBlock.ref,
+        PositionsBlock.ref,
+        VoxPopBlock.ref,
+        CorrectionBlock.ref,
+      ]),
+    ),
   }),
-  description: "The main story: an optional LeadArt, a Lede, then Sections.",
+  description:
+    "The main story: an optional LeadArt, a Lede, then Sections. A PullQuote, FactBox, Positions, VoxPop or Correction placed between Sections breaks out across the full width of the story.",
   component: ({ props, renderNode }) => <Story>{renderNode(props.blocks)}</Story>,
 });
 
 const SidebarBlock = defineComponent({
   name: "Sidebar",
   props: z.object({
-    blocks: z.array(z.union([KeyPointsBlock.ref, SectionBlock.ref])),
+    blocks: z.array(
+      z.union([
+        KeyPointsBlock.ref,
+        CastBlock.ref,
+        FactBoxBlock.ref,
+        TimelineBlock.ref,
+        CorrectionBlock.ref,
+        SectionBlock.ref,
+      ]),
+    ),
   }),
-  description: "The column beside the story: KeyPoints, then Sections for open questions and reading.",
+  description:
+    "The column beside the story: KeyPoints or a Cast first, then boxes and Sections for open questions and reading.",
   component: ({ props, renderNode }) => <Sidebar>{renderNode(props.blocks)}</Sidebar>,
 });
 
@@ -316,13 +434,17 @@ export const library = createLibrary({
     QuestionPart,
     ResourcePart,
     ResourceGroupPart,
+    FactPart,
+    EventPart,
+    PersonPart,
   ],
   componentGroups: [
     { name: "Page", components: ["Edition", "Headline", "ThreadMap", "Story", "Sidebar", "Colophon"] },
     { name: "Story", components: ["LeadArt", "Lede", "Section", "Prose", "PullQuote", "Exchange", "Positions"] },
+    { name: "Boxes", components: ["FactBox", "Timeline", "Cast", "VoxPop", "Correction"] },
     { name: "Article", components: ["ArticleSummary", "ArticleQuote"] },
     { name: "Sidebar", components: ["KeyPoints", "OpenQuestions", "ReadingList"] },
-    { name: "Parts", components: ["Quote", "Term", "Side", "Question", "Resource", "ResourceGroup"] },
+    { name: "Parts", components: ["Quote", "Term", "Side", "Question", "Resource", "ResourceGroup", "Fact", "Event", "Person"] },
   ],
 });
 

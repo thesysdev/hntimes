@@ -3,6 +3,7 @@
 import { parseMessage } from "@openuidev/lang-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Thread } from "@/lib/thread";
+import { type Desk, Dispatch } from "./Dispatch";
 import { EditionRenderer } from "./EditionRenderer";
 import { HighlightProvider } from "./Highlight";
 import styles from "./LiveEdition.module.css";
@@ -15,6 +16,8 @@ type Status = "working" | "done" | "error";
 /** One line of the /api/edition NDJSON stream. */
 type EditionEvent =
   | { type: "status"; message: string }
+  | { type: "story"; title: string; author: string; comments: number; site: string | null }
+  | { type: "brief"; shape: string; angle: string; headline: string; cast: string[] }
   | { type: "thread"; thread: Thread }
   | { type: "source"; name: string; ok: boolean; size: number; ms: number }
   | { type: "warning"; message: string }
@@ -28,9 +31,29 @@ const isDev = process.env.NODE_ENV === "development";
 const SOURCE_LABELS: Record<string, string> = {
   fetch_hn_thread: "thread",
   fetch_article: "article",
-  plan_image: "image query",
+  earlier_stories: "earlier stories",
+  plan_edition: "editor",
+  fetch_profiles: "profiles",
   search_images: "images",
 };
+
+/** A finished source as readers see it, or null for ones not worth a line. */
+function readerStep(e: { name: string; ok: boolean; size: number }, site: string | null): string | null {
+  if (!e.ok) return null;
+  if (e.name === "fetch_hn_thread") return `Read all ${e.size.toLocaleString("en-US")} comments`;
+  if (e.name === "fetch_article") return site ? `Read the article on ${site}` : "Read the article";
+  if (e.name === "fetch_profiles") return `Looked up ${e.size} of the sources on Hacker News`;
+  if (e.name === "earlier_stories")
+    return `Found ${e.size} earlier ${e.size === 1 ? "discussion" : "discussions"} of ${site ?? "the site"}`;
+  return null;
+}
+
+/** The route's progress messages, minus tooling details (models, search queries). */
+function readerStatus(message: string): string {
+  if (message.startsWith("Writing")) return "Writing the edition…";
+  if (message.startsWith("Searching")) return "Finding lead art…";
+  return message;
+}
 
 /**
  * Gateway wraps the program in a message envelope (`]]>openui:content … ]]>openui:end`) around a
@@ -45,7 +68,7 @@ function programOf(raw: string, streaming: boolean): string {
  * The edition for one story: gathered and written through /api/edition as soon as the page opens,
  * and rendered as it streams. A control strip shows progress and can write it again.
  */
-export function LiveEdition({ storyId }: { storyId: string }) {
+export function LiveEdition({ storyId, replay = false }: { storyId: string; replay?: boolean }) {
   const [thread, setThread] = useState<Thread | null>(null);
   const [program, setProgram] = useState("");
   const [status, setStatus] = useState<Status>("working");
@@ -54,6 +77,7 @@ export function LiveEdition({ storyId }: { storyId: string }) {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [elapsed, setElapsed] = useState(0);
+  const [desk, setDesk] = useState<Desk>({ done: [], now: "Reading the thread…" });
   const [showProgram, setShowProgram] = useState(false);
   const abort = useRef<AbortController | null>(null);
 
@@ -68,14 +92,16 @@ export function LiveEdition({ storyId }: { storyId: string }) {
   const run = useCallback(
     async (controller: AbortController) => {
       try {
-        const response = await fetch("/api/edition", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: `https://news.ycombinator.com/item?id=${storyId}`,
-          }),
-          signal: controller.signal,
-        });
+        const response = replay
+          ? await fetch(`/api/edition?id=${storyId}`, { signal: controller.signal })
+          : await fetch("/api/edition", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                url: `https://news.ycombinator.com/item?id=${storyId}`,
+              }),
+              signal: controller.signal,
+            });
         if (!response.ok || !response.body) {
           const body = await response.json().catch(() => ({}));
           throw new Error(body.error ?? `Request failed (${response.status})`);
@@ -92,13 +118,27 @@ export function LiveEdition({ storyId }: { storyId: string }) {
           buffer = lines.pop() ?? "";
           for (const line of lines.filter(Boolean)) {
             const e = JSON.parse(line) as EditionEvent;
-            if (e.type === "status") setMessage(e.message);
-            else if (e.type === "thread") setThread(e.thread);
-            else if (e.type === "source")
+            if (e.type === "status") {
+              setMessage(e.message);
+              setDesk((d) => ({ ...d, now: readerStatus(e.message) }));
+            } else if (e.type === "story") {
+              const { title, author, comments, site } = e;
+              setDesk((d) => ({ ...d, story: { title, author, comments, site } }));
+            } else if (e.type === "brief") {
+              const { shape, angle, headline, cast } = e;
+              const sources = cast.length ? `, through ${cast.slice(0, 3).join(", ")}${cast.length > 3 ? " and others" : ""}` : "";
+              setDesk((d) => ({ ...d, brief: { shape, angle, headline, cast }, done: [...d.done, `Assigned as a ${shape}${sources}`] }));
+            } else if (e.type === "thread") setThread(e.thread);
+            else if (e.type === "source") {
               setSources((s) => [
                 ...s,
                 `${SOURCE_LABELS[e.name] ?? e.name} ${e.ok ? "✓" : "–"} ${(e.ms / 1000).toFixed(1)}s`,
               ]);
+              setDesk((d) => {
+                const step = readerStep(e, d.story?.site ?? null);
+                return step ? { ...d, done: [...d.done, step] } : d;
+              });
+            }
             else if (e.type === "warning") setWarnings((w) => [...w, e.message]);
             else if (e.type === "text") {
               raw += e.delta;
@@ -116,7 +156,7 @@ export function LiveEdition({ storyId }: { storyId: string }) {
         setMessage(error instanceof Error ? error.message : String(error));
       }
     },
-    [storyId],
+    [storyId, replay],
   );
 
   // Write the edition as soon as the page opens; leaving the page cancels it.
@@ -139,6 +179,7 @@ export function LiveEdition({ storyId }: { storyId: string }) {
     setWarnings([]);
     setMessage("Starting…");
     setElapsed(0);
+    setDesk({ done: [], now: "Reading the thread…" });
     setStatus("working");
     run(controller);
   }
@@ -184,6 +225,7 @@ export function LiveEdition({ storyId }: { storyId: string }) {
         </p>
       )}
       {isDev && showProgram && <pre className={styles.program}>{program}</pre>}
+      {status === "working" && !(thread && program) && <Dispatch desk={desk} />}
       {thread && program && (
         <ThreadProvider thread={thread}>
           <HighlightProvider>

@@ -4,13 +4,18 @@ import { ThreadMapPlot, type Dot } from "./ThreadMapPlot";
 import styles from "./ThreadMap.module.css";
 
 const WIDTH = 1152; // matches the full page width (--page), so the plot renders at 1:1 on desktop
-const ROW = 22;
 const PAD_X = 6;
 const PAD_TOP = 10;
+const AXIS = 22;
+/** Most space between reply levels; deep threads squeeze their rows to fit HEIGHT. */
+const MAX_ROW = 22;
 /** Tick spacings in hours; the smallest that gives at most eight ticks is used. */
 const TICK_STEPS = [0.25, 0.5, 1, 2, 3, 6, 12, 24, 48];
-/** Space held while the thread loads: a typical thread nests about seven deep. */
-const LOADING_HEIGHT = PAD_TOP * 2 + 22 + ROW * 7;
+/**
+ * One height for every thread (room for seven levels at full spacing), so the page doesn't move
+ * when the map's data arrives while the story is streaming in below it.
+ */
+const HEIGHT = PAD_TOP * 2 + AXIS + MAX_ROW * 7;
 
 function hoursLabel(hours: number): string {
   return hours < 1 ? `${Math.round(hours * 60)}m` : `${hours}h`;
@@ -20,12 +25,24 @@ function hoursLabel(hours: number): string {
  * The shape of the conversation: time across, reply depth down, quoted comments marked.
  * `comments` comes from the get_comment_timeline tool, so geometry and counts come only from data.
  */
-export function ThreadMap({ comments, quoted = [] }: { comments: ThreadShapeComment[]; quoted?: number[] }) {
+export function ThreadMap({
+  comments,
+  quoted = [],
+  caption,
+}: {
+  comments: ThreadShapeComment[];
+  quoted?: number[];
+  /** Replaces the caption's last sentence, which explains the orange dots. */
+  caption?: React.ReactNode;
+}) {
   const quotedOnPage = useQuotedIds();
   if (comments.length === 0) {
     return (
       <figure className={styles.map} aria-busy>
-        <div className={styles.loading} style={{ aspectRatio: `${WIDTH} / ${LOADING_HEIGHT}` }} />
+        <div className={styles.loading} style={{ aspectRatio: `${WIDTH} / ${HEIGHT}` }} />
+        <figcaption className={styles.caption}>
+          <strong>The thread, mapped.</strong> Loading the comments…
+        </figcaption>
       </figure>
     );
   }
@@ -41,7 +58,8 @@ export function ThreadMap({ comments, quoted = [] }: { comments: ThreadShapeComm
   const topLevel = comments.filter((c) => c.depth === 0).length;
   // Linear time: equal widths are equal stretches of time.
   const x = (hours: number) => PAD_X + (Math.max(0, hours - start) / span) * (WIDTH - PAD_X * 2);
-  const y = (depth: number) => PAD_TOP + depth * ROW;
+  const row = Math.min(MAX_ROW, (HEIGHT - PAD_TOP * 2 - AXIS) / Math.max(1, maxDepth));
+  const y = (depth: number) => PAD_TOP + depth * row;
 
   const quotedSet = new Set([...quoted, ...quotedOnPage]);
   const dots: Dot[] = comments.map((c) => {
@@ -55,7 +73,6 @@ export function ThreadMap({ comments, quoted = [] }: { comments: ThreadShapeComm
       quoted: quotedSet.has(c.id),
     };
   });
-  const height = y(maxDepth) + PAD_TOP + 22;
   // Ticks count from the start of the conversation; "+" marks them as such when that's well after the post.
   const relative = start > 1 ? "+" : "";
   const step = TICK_STEPS.find((s) => span / s <= 8) ?? TICK_STEPS[TICK_STEPS.length - 1];
@@ -67,11 +84,15 @@ export function ThreadMap({ comments, quoted = [] }: { comments: ThreadShapeComm
 
   return (
     <figure className={styles.map}>
-      <ThreadMapPlot width={WIDTH} height={height} dots={dots} ticks={ticks} />
+      <ThreadMapPlot width={WIDTH} height={HEIGHT} dots={dots} ticks={ticks} />
       <figcaption className={styles.caption}>
         <strong>The thread, mapped.</strong> {comments.length} comments over {duration},{" "}
-        {topLevel} of them starting new discussions, replies nesting {maxDepth} deep. Each dot is a comment;{" "}
-        <span className={styles.key}>orange</span> dots are quoted on this page.
+        {topLevel} of them starting new discussions, replies nesting {maxDepth} deep.{" "}
+        {caption ?? (
+          <>
+            Each dot is a comment; <span className={styles.key}>orange</span> dots are quoted on this page.
+          </>
+        )}
       </figcaption>
     </figure>
   );

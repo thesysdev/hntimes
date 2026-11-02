@@ -27,6 +27,8 @@
 
 .prose {
   text-wrap: pretty;
+  /* Quoted comments can carry long URLs: break them rather than run into the next column. */
+  overflow-wrap: anywhere;
   margin-bottom: var(--space-4);
 }
 

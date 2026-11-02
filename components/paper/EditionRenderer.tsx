@@ -17,12 +17,15 @@ const tools = {
   },
 };
 
-/** Comment ids quoted anywhere in a parsed program (Quote and PullQuote elements). */
+/** Elements that point at one comment by id: quotes, and the people in a Cast. */
+const BY_ID = new Set(["Quote", "PullQuote", "Person"]);
+
+/** Comment ids quoted anywhere in a parsed program (Quote, PullQuote and Person elements). */
 function quotedIds(node: unknown, ids = new Set<number>()): Set<number> {
   if (Array.isArray(node)) node.forEach((child) => quotedIds(child, ids));
   else if (node && typeof node === "object") {
     const el = node as { type?: string; typeName?: string; props?: { id?: unknown } };
-    if (el.type === "element" && (el.typeName === "Quote" || el.typeName === "PullQuote") && typeof el.props?.id === "number")
+    if (el.type === "element" && BY_ID.has(el.typeName ?? "") && typeof el.props?.id === "number")
       ids.add(el.props.id);
     Object.values(node).forEach((child) => quotedIds(child, ids));
   }
@@ -54,7 +57,7 @@ export function EditionRenderer({
           setQuoted((previous) => (previous.size === ids.size ? previous : ids));
         }}
         onError={(errors) => {
-          if (errors.length > 0) console.error("[hackerpaper] edition errors", errors);
+          if (errors.length > 0) console.error("[hackerpaper] edition errors", JSON.stringify(errors, null, 2));
           onErrors?.(errors);
         }}
       />

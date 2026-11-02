@@ -2,6 +2,7 @@ import { getComment } from "@/lib/thread";
 import { useThread } from "./ThreadContext";
 import { Citation, type QuoteRef } from "./Quote";
 import styles from "./Positions.module.css";
+import { LinkNames } from "./Handle";
 
 type Side = {
   label: string;
@@ -44,7 +45,9 @@ export function Positions({ question, sides }: { question: string; sides: Side[]
   return (
     // data-linear: sides sit next to each other, so its section is never set in columns.
     <figure className={styles.positions} data-linear="full">
-      <figcaption className={styles.question}>{question}</figcaption>
+      <figcaption className={styles.question}>
+        <LinkNames text={question} />
+      </figcaption>
       <div className={styles.lean} aria-hidden>
         {counted.map((s, i) => (
           <span key={s.label} style={{ flexGrow: s.quotes.length }} data-side={i} />
@@ -59,10 +62,12 @@ export function Positions({ question, sides }: { question: string; sides: Side[]
             <h3 className={styles.label}>
               {s.label} <span className={styles.count}>{s.quotes.length}</span>
             </h3>
-            <p className={styles.summary}>{s.summary}</p>
+            <p className={styles.summary}>
+              <LinkNames text={s.summary} />
+            </p>
             <div>
-              {s.quotes.map((q) => (
-                <Citation key={q.id} {...q} />
+              {s.quotes.map((q, j) => (
+                <Citation key={`${q.id}-${j}`} {...q} />
               ))}
             </div>
           </section>
