@@ -14,7 +14,7 @@ import { loadSnapshot, saveSnapshot } from "@/lib/snapshots";
 // In production the caching rules decide what that means (lib/cache.ts): a cached edition is
 // replayed at once; a story under an hour old gets {"type":"building"}; otherwise the edition is
 // written, by one writer that every visitor follows live (lib/live.ts). Requests must pass Vercel
-// BotID, and only real HN stories with a discussion are ever written.
+// BotID, and only real HN stories with 100+ points and a discussion are ever written.
 //
 // In development nothing is cached: every request writes afresh, may pick its model and effort,
 // and leaves its program in runs/ and its thread in snapshots/ for checking.
@@ -61,7 +61,7 @@ async function cachedEdition(request: Request, id: number) {
     case "building":
       return ndjson([{ type: "building", readyIn: decision.readyIn }]);
     case "quiet":
-      return ndjson([{ type: "quiet" }]);
+      return ndjson([{ type: "quiet", settled: decision.settled }]);
     case "write": {
       const { run, writing } = await startOrJoin(decision.story, decision.final);
       // The run outlives this request: the edition is finished and stored even if this visitor leaves.

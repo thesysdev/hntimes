@@ -62,17 +62,21 @@ export function StillBuilding({ title, readyIn }: { title: string; /** Seconds u
   );
 }
 
-/** A story with too little discussion to report on (yet). */
-export function TooQuiet({ title }: { title: string }) {
+/**
+ * A story below the bar for an edition (100 points and a discussion): not yet, or, once it has
+ * settled, not at all.
+ */
+export function TooQuiet({ title, settled }: { title: string; settled: boolean }) {
   return (
     <section className={styles.dispatch}>
-      <p className={styles.kicker}>Quiet thread</p>
+      <p className={styles.kicker}>{settled ? "Not covered" : "Developing story"}</p>
       <h1 className={styles.title} data-draft>
         {title}
       </h1>
       <p className={styles.dek}>
-        There isn&rsquo;t enough of a conversation here to report on yet. Come back once readers have had
-        their say.
+        {settled
+          ? "Hackerpaper covers stories that reached 100 points and drew a discussion. This one didn’t."
+          : "Hackerpaper writes up stories once they reach 100 points and draw a discussion. This one isn’t there yet: come back as it develops."}
       </p>
     </section>
   );

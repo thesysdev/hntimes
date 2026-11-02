@@ -46,7 +46,7 @@ async function Edition({ searchParams }: { searchParams: SearchParams }) {
   if (decision.action === "quiet")
     return (
       <PaperFrame masthead={<Masthead edition={Number(id)} />}>
-        <TooQuiet title={decision.story.title} />
+        <TooQuiet title={decision.story.title} settled={decision.settled} />
       </PaperFrame>
     );
   return <LiveEdition key={id} storyId={id} />;

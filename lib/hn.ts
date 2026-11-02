@@ -5,6 +5,7 @@ import { plainText, type Comment, type Thread } from "./thread";
 
 /** One item in Algolia's tree shape. */
 type RawItem = {
+  type?: string;
   id: number;
   author: string | null;
   created_at_i: number;
@@ -120,9 +121,12 @@ export async function fetchFrontPage(): Promise<FrontPageStory[]> {
     .sort((a, b) => rank(b) - rank(a));
 }
 
-/** The thread for an HN story id, from Algolia. */
+/** The thread for an HN story id, from Algolia. Throws for anything that isn't a story. */
 export async function fetchThread(id: string): Promise<{ thread: Thread; source: "algolia" }> {
-  return { thread: normalize(await fromAlgolia(id)), source: "algolia" };
+  const raw = await fromAlgolia(id);
+  // Comments, jobs and polls have item ids too: only stories (including Ask and Show HN) have editions.
+  if (raw.type !== "story" || raw.id !== Number(id)) throw new Error(`Item ${id} isn't a Hacker News story.`);
+  return { thread: normalize(raw), source: "algolia" };
 }
 
 export type EarlierStory = { id: number; title: string; points: number; comments: number; time: number };
@@ -200,7 +204,15 @@ export async function fetchProfiles(names: string[]): Promise<Record<string, Pro
   return Object.fromEntries(profiles.filter((entry): entry is [string, Profile] => entry[1] !== null));
 }
 
-export type Story = { id: number; time: number; comments: number; title: string; url: string | null; author: string };
+export type Story = {
+  id: number;
+  time: number;
+  points: number;
+  comments: number;
+  title: string;
+  url: string | null;
+  author: string;
+};
 
 /**
  * A story's headline facts, from a light Algolia lookup (not the whole thread). Null when the id
@@ -214,6 +226,7 @@ export async function fetchStory(id: number): Promise<Story | null> {
   return {
     id,
     time: hit.created_at_i,
+    points: hit.points ?? 0,
     comments: hit.num_comments ?? 0,
     title: hit.title,
     url: hit.url,

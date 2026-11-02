@@ -159,6 +159,15 @@ export function FrontPage({ stories, lead: conversation }: { stories: FrontPageS
           ))}
         </div>
       </div>
+      <footer className={styles.colophon}>
+        <p>
+          Every story here opens as an edition of its thread, written live and set with{" "}
+          <a href="https://www.openui.com" className={styles.openui}>
+            OpenUI
+          </a>
+          . Here&rsquo;s <Link href="/how-it-works">how it works</Link>.
+        </p>
+      </footer>
     </section>
   );
 }

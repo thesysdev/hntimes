@@ -85,11 +85,14 @@ export function Colophon() {
   return (
     <footer className={styles.colophon}>
       <p>
-        Composed from {story.commentCount} comments{article ? " and the linked article" : ""}. Quotes are
-        verbatim and link to their source on Hacker News. Notes marked ◆ are added context, not from the
-        thread.
+        Composed from {story.commentCount} comments{article ? " and the linked article" : ""}, and set live
+        with{" "}
+        <a href="https://www.openui.com" className={styles.openui}>
+          OpenUI
+        </a>
+        . Quotes are verbatim and link to their source on Hacker News; notes marked ◆ are added context.
+        Here&rsquo;s <a href="/how-it-works">how it works</a>.
       </p>
-      <p>Written by a language model from the thread and the article, and composed with OpenUI.</p>
     </footer>
   );
 }

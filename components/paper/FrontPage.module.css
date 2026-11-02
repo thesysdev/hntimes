@@ -320,3 +320,30 @@
     border-left: 1px solid var(--rule);
   }
 }
+
+/* The page's closing line, matching an edition's colophon. */
+.colophon {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 3px double var(--rule-strong);
+  font-size: var(--step--1);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.colophon a {
+  color: var(--ink-2);
+  text-decoration: underline;
+}
+
+.colophon .openui {
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+

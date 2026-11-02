@@ -24,7 +24,7 @@ type EditionEvent =
   | { type: "text"; delta: string }
   | { type: "done"; model: string; ms: number; firstTokenMs: number }
   | { type: "building"; readyIn: number }
-  | { type: "quiet" }
+  | { type: "quiet"; settled: boolean }
   | { type: "error"; message: string };
 
 // Timings, sources, the raw program and a rerun button are for development; readers get the paper.
@@ -67,7 +67,7 @@ function programOf(raw: string, streaming: boolean): string {
 }
 
 /** Why there's no edition to show: the story is too young, or its thread too quiet. */
-type Notice = { type: "building"; readyIn: number } | { type: "quiet" };
+type Notice = { type: "building"; readyIn: number } | { type: "quiet"; settled: boolean };
 
 /**
  * The edition for one story. A cached edition (`initial`) renders at once; otherwise it's written
@@ -250,7 +250,7 @@ export function LiveEdition({
       {notice?.type === "building" && (
         <StillBuilding title={desk.story?.title ?? "This story"} readyIn={notice.readyIn} />
       )}
-      {notice?.type === "quiet" && <TooQuiet title={desk.story?.title ?? "This story"} />}
+      {notice?.type === "quiet" && <TooQuiet title={desk.story?.title ?? "This story"} settled={notice.settled} />}
       {thread && program && (
         <ThreadProvider thread={thread}>
           <HighlightProvider>
