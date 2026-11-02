@@ -35,11 +35,12 @@ export type EditionEvent =
   | { type: "done"; model: string; ms: number; firstTokenMs: number }
   | { type: "error"; message: string };
 
-export const MODEL = process.env.HACKERPAPER_MODEL ?? "openai/gpt-6.1-sol";
 export const REASONING = ["minimal", "low", "medium", "high"] as const; // the values Gateway accepts
 export type Reasoning = (typeof REASONING)[number];
-/** Default reasoning effort; unset means the model's own default. */
-export const DEFAULT_REASONING = process.env.HACKERPAPER_REASONING as Reasoning | undefined;
+/** The model editions are written with, and its reasoning effort. HACKERPAPER_MODEL and
+ * HACKERPAPER_REASONING override them (for comparing models locally). */
+export const MODEL = process.env.HACKERPAPER_MODEL ?? "openai/gpt-6.1-sol";
+export const DEFAULT_REASONING = (process.env.HACKERPAPER_REASONING ?? "low") as Reasoning;
 
 // The spec file also carries prompt options; Cloud takes those separately, below.
 const { root, components, componentGroups, schema } = spec as LibrarySpec;
