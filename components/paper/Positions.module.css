@@ -1,0 +1,132 @@
+.positions {
+  margin: var(--block-gap) 0;
+  /* Spans both story columns: two sides need room side by side. */
+  column-span: all;
+}
+
+.question {
+  font-size: var(--step-1);
+  font-style: italic;
+  line-height: 1.35;
+  text-wrap: balance;
+  margin-bottom: var(--space-4);
+}
+
+.lean {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+
+.lean span {
+  border-radius: 1px;
+}
+
+.lean [data-side="0"] {
+  background: var(--accent);
+}
+
+.lean [data-side="1"] {
+  background: var(--ink);
+}
+
+.lean [data-side="2"] {
+  background: var(--ink-3);
+}
+
+.leanNote {
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  color: var(--ink-3);
+}
+
+/*
+ * All sides in one row (at most three), set as a ruled panel: hairlines between the columns and
+ * along the bottom. Each side spans three shared rows (label, summary, quotes) through subgrid,
+ * so the summaries and the rule under them line up across columns whatever their length.
+ */
+.sides {
+  display: grid;
+  grid-template-columns: repeat(var(--sides, 2), minmax(0, 1fr));
+  margin-top: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.side {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  padding: 0 var(--space-4);
+}
+
+.side:first-child {
+  padding-left: 0;
+}
+
+.side:last-child {
+  padding-right: 0;
+}
+
+.side + .side {
+  border-left: 1px solid var(--rule);
+}
+
+@media (max-width: 640px) {
+  .sides {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    padding: 0;
+  }
+
+  .side + .side {
+    border-left: 0;
+    margin-top: var(--space-4);
+  }
+}
+
+.label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.label::before {
+  content: "";
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 1px;
+  align-self: center;
+}
+
+.side[data-side="0"] .label::before {
+  background: var(--accent);
+}
+
+.side[data-side="1"] .label::before {
+  background: var(--ink);
+}
+
+.side[data-side="2"] .label::before {
+  background: var(--ink-3);
+}
+
+.count {
+  font-weight: 400;
+  color: var(--ink-3);
+  font-variant-numeric: lining-nums;
+}
+
+.summary {
+  line-height: 1.5;
+  text-wrap: pretty;
+  margin-bottom: var(--space-3);
+}

@@ -1,0 +1,184 @@
+/* Shared byline: who said it, to whom, and when. */
+.byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-style: normal;
+  font-variant-numeric: lining-nums;
+}
+
+.author {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.op {
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.meta {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+a.meta:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* Pull quote: large type under a short heavy rule, as in print. */
+.pull {
+  margin: var(--block-gap) 0;
+  break-inside: avoid;
+}
+
+.pull::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 3px;
+  background: var(--rule-strong);
+  margin-bottom: var(--space-4);
+}
+
+.pull blockquote {
+  font-size: var(--step-2);
+  font-weight: 500;
+  font-variation-settings: "opsz" 48;
+  line-height: 1.3;
+  text-wrap: pretty;
+  margin-bottom: var(--space-3);
+}
+
+.pull blockquote p + p {
+  margin-top: var(--space-3);
+}
+
+.pull blockquote p:first-child::before {
+  content: "“";
+}
+
+.pull blockquote p:last-child::after {
+  content: "”";
+}
+
+/*
+ * Exchange: a reply chain drawn as one thread line. Each turn draws its own segment down to the
+ * next, so the line survives when columns split the exchange.
+ */
+.exchange {
+  margin: var(--block-gap) 0;
+}
+
+.exchange > li + li {
+  margin-top: var(--space-4);
+}
+
+.turn {
+  position: relative;
+  padding-left: var(--space-6);
+  break-inside: avoid;
+}
+
+.exchange > li:not(:last-child) > .turn::after {
+  content: "";
+  position: absolute;
+  left: calc(0.325rem - 0.5px);
+  top: 1.25rem;
+  bottom: calc(-1 * var(--space-4) - 0.45rem);
+  width: 1px;
+  background: var(--rule);
+}
+
+.turn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink-3);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.turn[data-active]::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.turn p {
+  margin-top: var(--space-2);
+  text-wrap: pretty;
+}
+
+/* Cite: a quoted phrase inside a paragraph, credited in small type like a newspaper attribution. */
+.citeCredit {
+  margin-left: 0.3em;
+  font-family: var(--font-ui);
+  font-size: 0.68em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: 0.08em;
+}
+
+.citeCredit:hover,
+.cite[data-active] .citeCredit {
+  color: var(--accent-ink);
+}
+
+/* Citation: compact quote inside other components */
+.citation {
+  break-inside: avoid;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.citation p {
+  display: inline;
+}
+
+.citation p::before {
+  content: "“";
+}
+
+.citation p::after {
+  content: "” ";
+}
+
+.citationAuthor {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.citationAuthor::before {
+  content: "— ";
+  color: var(--ink-3);
+}
+
+.citationAuthor:hover {
+  text-decoration: underline;
+}
+
+/* Hovering a citation lights its dot on the thread map; mark it here in the same orange. */
+.citation[data-active] .citationAuthor {
+  color: var(--accent-ink);
+}

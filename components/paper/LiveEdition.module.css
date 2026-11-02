@@ -1,0 +1,76 @@
+/* A slim control strip under the masthead: tooling, not part of the paper. */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  margin: calc(-1 * var(--space-6)) 0 var(--space-6);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  color: var(--ink-3);
+}
+
+.url {
+  flex: 1 1 22rem;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.url:focus {
+  border-color: var(--rule-strong);
+  outline: none;
+}
+
+.generate {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule-strong);
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.generate:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.generate:disabled {
+  border-color: var(--rule);
+  color: var(--ink-3);
+  cursor: progress;
+}
+
+.meta {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.error {
+  color: var(--accent-ink);
+}
+
+.toggle {
+  margin-left: auto;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.program {
+  max-height: 24rem;
+  overflow: auto;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--paper-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

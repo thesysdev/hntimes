@@ -1,0 +1,99 @@
+.page {
+  max-width: calc(var(--page) + 2 * var(--space-4));
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+}
+
+/*
+ * The sheet. Everything spans the full width (headline, map, colophon) except the story
+ * and the sidebar, which sit side by side on wide screens.
+ */
+.sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sheet > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.sheet > [data-slot="sidebar"] {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--rule-strong);
+}
+
+/* Components inside query this width, so they fit the narrow sidebar on their own. */
+.sidebar {
+  container-type: inline-size;
+}
+
+/* Columns of text: from tablet width up, each section balances its own columns. */
+@media (min-width: 760px) {
+  .sheet [data-slot="story"] {
+    font-size: 1.0625rem;
+  }
+
+  .sheet [data-slot="story"] [data-columns] {
+    columns: 2;
+    column-gap: var(--column-gap);
+    column-rule: 1px solid var(--rule);
+  }
+
+  /*
+   * Sections holding a conversation or a debate read top to bottom: one column, with text kept
+   * at reading width. A debate's sides still use the full width.
+   */
+  .sheet [data-slot="story"] [data-columns]:has(> [data-linear]) {
+    columns: auto;
+  }
+
+  .sheet [data-slot="story"] [data-columns]:has(> [data-linear]) > :not([data-linear="full"]) {
+    max-width: var(--measure);
+  }
+
+  /* Ragged right, hyphenated. Browsers justify line by line, which opens wide gaps in narrow columns. */
+  .sheet [data-slot="story"] [data-prose] {
+    hyphens: auto;
+    hyphenate-limit-chars: 8 4 3;
+    /* A column never starts or ends on a stranded line or two of a paragraph. */
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Keep each section's columns visually even: the shorter column ends on the same rule. */
+  .sheet [data-slot="story"] [data-columns] {
+    column-fill: balance;
+  }
+
+  /* Paragraphs run on as in print: no space between them, the next one indented. */
+  .sheet [data-slot="story"] [data-prose]:has(+ [data-prose]) {
+    margin-bottom: 0;
+  }
+
+  .sheet [data-slot="story"] [data-prose] + [data-prose] {
+    text-indent: 1.25em;
+  }
+}
+
+@media (min-width: 1081px) {
+  .sheet {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    column-gap: var(--gutter);
+  }
+
+  .sheet > [data-slot="story"] {
+    grid-column: 1;
+  }
+
+  .sheet > [data-slot="sidebar"] {
+    grid-column: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    padding-left: var(--gutter);
+    margin-left: calc(-1 * var(--gutter) / 2);
+    border-left: 1px solid var(--rule);
+  }
+}

@@ -1,0 +1,107 @@
+.front {
+  max-width: var(--page);
+}
+
+.lead {
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 2px solid var(--rule-strong);
+}
+
+.kicker {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.leadTitle {
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
+  font-weight: 700;
+  font-variation-settings: "opsz" 72;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  max-width: 24ch;
+  margin-bottom: var(--space-3);
+}
+
+.leadTitle a,
+.title a {
+  text-decoration: none;
+}
+
+.leadTitle a:hover,
+.title a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.12em;
+}
+
+/* The rest of the page: a numbered index in two columns, ruled like a paper's contents. */
+.index {
+  columns: 2;
+  column-gap: var(--column-gap);
+  column-rule: 1px solid var(--rule);
+  counter-reset: story 1;
+}
+
+.story {
+  break-inside: avoid;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule);
+  counter-increment: story;
+}
+
+.story::before {
+  content: counter(story);
+  grid-row: span 2;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
+  color: var(--ink-3);
+  padding-top: 0.2em;
+}
+
+.title {
+  font-size: var(--step-1);
+  font-weight: 600;
+  font-variation-settings: "opsz" 36;
+  line-height: 1.25;
+  text-wrap: pretty;
+}
+
+.byline {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-variant-numeric: lining-nums;
+  color: var(--ink-3);
+  margin-top: var(--space-1);
+}
+
+.source {
+  color: var(--ink-2);
+}
+
+.empty,
+.skeleton {
+  font-family: var(--font-ui);
+  color: var(--ink-3);
+}
+
+.skeleton {
+  min-height: 60vh;
+  background: linear-gradient(var(--paper-2) 0 4rem, transparent 4rem 5.5rem) 0 0 / 100% 5.5rem;
+  opacity: 0.6;
+}
+
+@media (max-width: 760px) {
+  .index {
+    columns: 1;
+  }
+}

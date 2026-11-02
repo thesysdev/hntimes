@@ -1,0 +1,70 @@
+.summary {
+  margin: var(--block-gap) 0;
+  padding: var(--space-4);
+  /* Long enough to be worth splitting across columns; keep only the heading with the first point. */
+  box-decoration-break: clone;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule-strong);
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: var(--space-2);
+}
+
+.label a {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.title {
+  font-size: var(--step-1);
+  font-weight: 500;
+  font-variation-settings: "opsz" 36;
+  line-height: 1.25;
+  margin-bottom: var(--space-3);
+  break-after: avoid;
+}
+
+.summary ul {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.summary li {
+  position: relative;
+  padding-left: var(--space-5);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.summary li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--ink-3);
+}
+
+.quote {
+  margin: var(--block-gap) 0;
+  break-inside: avoid;
+  padding: var(--space-2) 0 var(--space-2) var(--space-5);
+  border-left: 3px double var(--ink);
+  font-size: var(--step-1);
+  font-style: italic;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.quote footer {
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-style: normal;
+  color: var(--ink-3);
+}

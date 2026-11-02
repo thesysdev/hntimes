@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# editors and local tooling (.claude/launch.json holds machine-specific paths)
+.claude/
+.vscode/
+.idea/
+*.log
+
+# editions written by /api/edition, and the thread snapshots they were written from
+/runs
+/snapshots
+
+# prompt dumps from `openui generate`; library.spec.json and schema.json are used and stay checked in
+/generated/system-prompt.txt
+/generated/system-prompt.spec.json

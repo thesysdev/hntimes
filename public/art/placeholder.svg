@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750">
+  <!-- Stand-in lead art until image search is connected. Tonal shapes so the dither has texture. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f4f4"/>
+      <stop offset="1" stop-color="#9a9a9a"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cfcfcf"/>
+    </radialGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6e6e6e"/>
+      <stop offset="1" stop-color="#1e1e1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="750" fill="url(#sky)"/>
+  <circle cx="860" cy="250" r="120" fill="url(#sun)"/>
+  <path d="M0 520 C 220 400, 420 470, 620 430 S 1000 360, 1200 450 L1200 750 L0 750 Z" fill="#7d7d7d"/>
+  <path d="M0 610 C 260 520, 520 600, 760 560 S 1080 520, 1200 580 L1200 750 L0 750 Z" fill="url(#hill)"/>
+  <text x="600" y="700" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" letter-spacing="8" fill="#f2f2f2">IMAGE TO COME</text>
+</svg>

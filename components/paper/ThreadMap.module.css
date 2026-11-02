@@ -1,0 +1,74 @@
+.map {
+  margin: 0 0 var(--space-7);
+}
+
+/* The map is the page's lead graphic, across the whole sheet like a front-page photo. */
+.caption {
+  max-width: var(--measure);
+}
+
+.loading {
+  width: 100%;
+  background: var(--paper-2);
+}
+
+.plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.tick {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 1 3;
+}
+
+.tickLabel {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  fill: var(--ink-3);
+  text-anchor: middle;
+}
+
+.branch {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 0.75;
+  opacity: 0.4;
+}
+
+.dot {
+  fill: var(--ink-2);
+  opacity: 0.6;
+}
+
+.quoted {
+  fill: var(--accent);
+  stroke: var(--paper);
+  stroke-width: 1.5;
+  transition: r 150ms ease;
+}
+
+.quoted[data-active] {
+  r: 7px;
+}
+
+.caption {
+  margin-top: var(--space-3);
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.caption strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.key {
+  color: var(--accent-ink);
+  font-weight: 600;
+}

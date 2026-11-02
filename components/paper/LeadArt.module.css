@@ -1,0 +1,53 @@
+.art {
+  margin: 0 0 var(--block-gap);
+  break-inside: avoid;
+}
+
+/* A hairline keeps pale images (screenshots, diagrams) from floating loose on the page. */
+.frame {
+  border: 1px solid var(--rule);
+  padding: var(--space-2);
+  background: var(--paper);
+}
+
+/*
+ * Newsprint: grayscale with a little contrast. `multiply` lets the image's whites take on the
+ * paper color, so it sits in the page instead of on it.
+ */
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.1);
+  mix-blend-mode: multiply;
+}
+
+/* On dark paper, multiply would sink the image to near black; dim it slightly instead. */
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .image {
+    mix-blend-mode: normal;
+    filter: grayscale(1) contrast(1.05) brightness(0.85);
+  }
+}
+
+:global(:root[data-theme="dark"]) .image {
+  mix-blend-mode: normal;
+  filter: grayscale(1) contrast(1.05) brightness(0.85);
+}
+
+.caption {
+  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.credit {
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}

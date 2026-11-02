@@ -1,26 +1,110 @@
-@import "tailwindcss";
+@import "tailwindcss/preflight.css" layer(base);
 
+/*
+ * Hackerpaper design tokens.
+ * Paper and ink, one accent, and three voices: thread (accent), article (ink), added context (note).
+ * Colors are light-dark() pairs: the system setting picks one, unless the reader chose a theme
+ * (data-theme on <html>, set by ThemeToggle).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light dark;
+
+  /* Newsprint: white paper, near-black ink, hairline rules. */
+  --paper: light-dark(#ffffff, #121212);
+  --paper-2: light-dark(#f7f7f5, #1d1d1d);
+  --ink: light-dark(#121212, #f2f2f2);
+  --ink-2: light-dark(#363636, #c9c9c9);
+  --ink-3: light-dark(#727272, #8f8f8f);
+  --rule: light-dark(#dfdfdf, #343434);
+  --rule-strong: light-dark(#121212, #f2f2f2);
+
+  /* HN orange marks data only (quoted comments, the debate bar), never page chrome. */
+  --accent: light-dark(#e2570b, #ff7a2e);
+  --accent-ink: light-dark(#a8440c, #ff9b5e);
+  --accent-wash: light-dark(#f8dfc9, #3b2417);
+
+  --note: light-dark(#4f6470, #9db3be); /* added context */
+  --note-wash: light-dark(#e6eaec, #252b2e);
+
+  --font-display: var(--font-unifraktur), "Old English Text MT", serif; /* nameplate only */
+  --font-text: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-ui: var(--font-franklin), "Franklin Gothic", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Type scale from a 20px body */
+  --step--2: 0.75rem;
+  --step--1: 0.875rem;
+  --step-0: 1.25rem;
+  --step-1: 1.4375rem;
+  --step-2: 1.625rem;
+  --step-3: 2.4rem;
+  --step-4: 2.75rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+
+  /* Vertical rhythm: one line of body text between blocks, more above a section rule than below. */
+  --block-gap: 1.5rem;
+  --section-gap: 2.5rem;
+  --rule-gap: 1rem;
+
+  /* Page geometry: a broadsheet grid. Story columns on the left, a sidebar on the right. */
+  --page: 72rem;
+  --gutter: 2.5rem; /* between story and sidebar */
+  --column-gap: 2rem; /* between text columns */
+  --measure: 37.5rem; /* single-column reading width (summary, captions, phones) */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  hanging-punctuation: first;
+}
+
+::selection {
+  background: var(--note-wash);
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--ink-3);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: text-decoration-color 120ms ease;
+}
+
+a:hover {
+  text-decoration-color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }

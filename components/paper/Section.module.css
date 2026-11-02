@@ -1,0 +1,64 @@
+/* Every section opens on a hairline: generous space above it, a tighter space below. */
+.section {
+  margin-top: var(--section-gap);
+  padding-top: var(--rule-gap);
+  border-top: 1px solid var(--rule);
+}
+
+.section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.title {
+  font-size: var(--step-2);
+  font-weight: 700;
+  font-variation-settings: "opsz" 36;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin-bottom: var(--space-3);
+}
+
+/* The section's last block never adds space before the next rule. */
+.section [data-columns] > :last-child {
+  margin-bottom: 0;
+}
+
+.prose {
+  text-wrap: pretty;
+  margin-bottom: var(--space-4);
+}
+
+/* "What to know" box: a heavy rule on top, a hairline below. */
+.keyPoints {
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--rule);
+}
+
+.keyTitle {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+}
+
+.keyPoints ol {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.keyPoints li {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  align-items: baseline;
+  font-size: var(--step--1);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.keyNumber {
+  font-weight: 700;
+  font-variant-numeric: lining-nums;
+}

@@ -1,0 +1,840 @@
+{
+  "root": "Edition",
+  "components": {
+    "Edition": {
+      "signature": "Edition(blocks: (Headline | ThreadMap | Story | Sidebar | Colophon)[])",
+      "description": "The whole page, in order: Headline, ThreadMap, Story, Sidebar, Colophon."
+    },
+    "Headline": {
+      "signature": "Headline(kicker: string, title: string, dek: string)",
+      "description": "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek)."
+    },
+    "ThreadMap": {
+      "signature": "ThreadMap(comments: {id: number, parent: number, depth: number, hours: number}[], quoted?: number[])",
+      "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional."
+    },
+    "Story": {
+      "signature": "Story(blocks: (LeadArt | Lede | Section)[])",
+      "description": "The main story: an optional LeadArt, a Lede, then Sections."
+    },
+    "Sidebar": {
+      "signature": "Sidebar(blocks: (KeyPoints | Section)[])",
+      "description": "The column beside the story: KeyPoints, then Sections for open questions and reading."
+    },
+    "Colophon": {
+      "signature": "Colophon()",
+      "description": "The closing note on how the edition was made. Always last."
+    },
+    "Lede": {
+      "signature": "Lede(text: string)",
+      "description": "The opening paragraph of the story, set large with a drop cap. 3 to 5 sentences."
+    },
+    "Section": {
+      "signature": "Section(title: string, blocks: (Prose | PullQuote | Exchange | Positions | LeadArt | ArticleSummary | ArticleQuote | KeyPoints | OpenQuestions | ReadingList)[])",
+      "description": "A titled part of the story or sidebar. In the Story its text is set in two columns."
+    },
+    "Prose": {
+      "signature": "Prose(text: string, cites?: Quote[], terms?: Term[])",
+      "description": "A paragraph in the editor's voice: report and paraphrase, the way a newspaper does. Plain text, no markdown. To quote a commenter, write {1}, {2}… where their words go and list the Quotes in cites (each excerpt a short phrase or sentence); the page prints the excerpt in quotation marks with the commenter's name. Never type quoted words or quotation marks around someone's words yourself. Terms are marked inline and defined after the paragraph."
+    },
+    "PullQuote": {
+      "signature": "PullQuote(id: number, excerpt?: string)",
+      "description": "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate."
+    },
+    "Exchange": {
+      "signature": "Exchange(quotes: Quote[])",
+      "description": "A back-and-forth printed as a transcript. Use rarely: usually it reads better told in Prose with cites. Each quote must be a direct reply to the one before it, or nothing renders."
+    },
+    "Positions": {
+      "signature": "Positions(question: string, sides: Side[])",
+      "description": "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner."
+    },
+    "LeadArt": {
+      "signature": "LeadArt(src: string, caption: string, credit: string)",
+      "description": "An image printed in black and white, like a newspaper photo. Use the image you are given; never invent a src. caption says what it shows in one sentence; credit names the source (e.g. \"Screenshot of example.com\")."
+    },
+    "ArticleSummary": {
+      "signature": "ArticleSummary(title: string, points: string[])",
+      "description": "What the linked article says, as short points, kept visibly apart from what commenters said."
+    },
+    "ArticleQuote": {
+      "signature": "ArticleQuote(text: string)",
+      "description": "A quote from the linked article. Must be copied exactly from the article, or nothing renders."
+    },
+    "KeyPoints": {
+      "signature": "KeyPoints(title: string, items: string[])",
+      "description": "A numbered summary box: 3 to 5 one-sentence takeaways."
+    },
+    "OpenQuestions": {
+      "signature": "OpenQuestions(items: Question[])",
+      "description": "Questions the thread raised and didn't settle."
+    },
+    "ReadingList": {
+      "signature": "ReadingList(groups: ResourceGroup[])",
+      "description": "Links and tools from the thread, grouped. Credits who mentioned each one."
+    },
+    "Quote": {
+      "signature": "Quote(id: number, excerpt?: string)",
+      "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
+    },
+    "Term": {
+      "signature": "Term(term: string, definition: string)",
+      "description": "A word in a Prose text to define for the reader. term must appear exactly in the text. The definition is added context and is shown apart from the thread."
+    },
+    "Side": {
+      "signature": "Side(label: string, summary: string, quotes: Quote[])",
+      "description": "One side of a disagreement: a short label, a one-sentence summary, and the comments that argue it."
+    },
+    "Question": {
+      "signature": "Question(question: string, id: number)",
+      "description": "A question the thread left unsettled, and the id of the comment that raised it."
+    },
+    "Resource": {
+      "signature": "Resource(name: string, note: string, url?: string, ids?: number[])",
+      "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
+    },
+    "ResourceGroup": {
+      "signature": "ResourceGroup(title: string, items: Resource[])",
+      "description": "A titled group of resources."
+    }
+  },
+  "componentGroups": [
+    {
+      "name": "Page",
+      "components": [
+        "Edition",
+        "Headline",
+        "ThreadMap",
+        "Story",
+        "Sidebar",
+        "Colophon"
+      ]
+    },
+    {
+      "name": "Story",
+      "components": [
+        "LeadArt",
+        "Lede",
+        "Section",
+        "Prose",
+        "PullQuote",
+        "Exchange",
+        "Positions"
+      ]
+    },
+    {
+      "name": "Article",
+      "components": [
+        "ArticleSummary",
+        "ArticleQuote"
+      ]
+    },
+    {
+      "name": "Sidebar",
+      "components": [
+        "KeyPoints",
+        "OpenQuestions",
+        "ReadingList"
+      ]
+    },
+    {
+      "name": "Parts",
+      "components": [
+        "Quote",
+        "Term",
+        "Side",
+        "Question",
+        "Resource",
+        "ResourceGroup"
+      ]
+    }
+  ],
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "Edition": {
+        "$ref": "#/$defs/Edition"
+      },
+      "Headline": {
+        "$ref": "#/$defs/Headline"
+      },
+      "ThreadMap": {
+        "$ref": "#/$defs/ThreadMap"
+      },
+      "Story": {
+        "$ref": "#/$defs/Story"
+      },
+      "Sidebar": {
+        "$ref": "#/$defs/Sidebar"
+      },
+      "Colophon": {
+        "$ref": "#/$defs/Colophon"
+      },
+      "Lede": {
+        "$ref": "#/$defs/Lede"
+      },
+      "Section": {
+        "$ref": "#/$defs/Section"
+      },
+      "Prose": {
+        "$ref": "#/$defs/Prose"
+      },
+      "PullQuote": {
+        "$ref": "#/$defs/PullQuote"
+      },
+      "Exchange": {
+        "$ref": "#/$defs/Exchange"
+      },
+      "Positions": {
+        "$ref": "#/$defs/Positions"
+      },
+      "LeadArt": {
+        "$ref": "#/$defs/LeadArt"
+      },
+      "ArticleSummary": {
+        "$ref": "#/$defs/ArticleSummary"
+      },
+      "ArticleQuote": {
+        "$ref": "#/$defs/ArticleQuote"
+      },
+      "KeyPoints": {
+        "$ref": "#/$defs/KeyPoints"
+      },
+      "OpenQuestions": {
+        "$ref": "#/$defs/OpenQuestions"
+      },
+      "ReadingList": {
+        "$ref": "#/$defs/ReadingList"
+      },
+      "Quote": {
+        "$ref": "#/$defs/Quote"
+      },
+      "Term": {
+        "$ref": "#/$defs/Term"
+      },
+      "Side": {
+        "$ref": "#/$defs/Side"
+      },
+      "Question": {
+        "$ref": "#/$defs/Question"
+      },
+      "Resource": {
+        "$ref": "#/$defs/Resource"
+      },
+      "ResourceGroup": {
+        "$ref": "#/$defs/ResourceGroup"
+      }
+    },
+    "required": [
+      "Edition",
+      "Headline",
+      "ThreadMap",
+      "Story",
+      "Sidebar",
+      "Colophon",
+      "Lede",
+      "Section",
+      "Prose",
+      "PullQuote",
+      "Exchange",
+      "Positions",
+      "LeadArt",
+      "ArticleSummary",
+      "ArticleQuote",
+      "KeyPoints",
+      "OpenQuestions",
+      "ReadingList",
+      "Quote",
+      "Term",
+      "Side",
+      "Question",
+      "Resource",
+      "ResourceGroup"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+      "Edition": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Headline"
+                },
+                {
+                  "$ref": "#/$defs/ThreadMap"
+                },
+                {
+                  "$ref": "#/$defs/Story"
+                },
+                {
+                  "$ref": "#/$defs/Sidebar"
+                },
+                {
+                  "$ref": "#/$defs/Colophon"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ],
+        "additionalProperties": false,
+        "description": "The whole page, in order: Headline, ThreadMap, Story, Sidebar, Colophon."
+      },
+      "Headline": {
+        "type": "object",
+        "properties": {
+          "kicker": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dek": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kicker",
+          "title",
+          "dek"
+        ],
+        "additionalProperties": false,
+        "description": "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek)."
+      },
+      "ThreadMap": {
+        "type": "object",
+        "properties": {
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "parent": {
+                  "type": "number"
+                },
+                "depth": {
+                  "type": "number"
+                },
+                "hours": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "parent",
+                "depth",
+                "hours"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "quoted": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "comments"
+        ],
+        "additionalProperties": false,
+        "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional."
+      },
+      "Story": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/LeadArt"
+                },
+                {
+                  "$ref": "#/$defs/Lede"
+                },
+                {
+                  "$ref": "#/$defs/Section"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ],
+        "additionalProperties": false,
+        "description": "The main story: an optional LeadArt, a Lede, then Sections."
+      },
+      "LeadArt": {
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "credit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "src",
+          "caption",
+          "credit"
+        ],
+        "additionalProperties": false,
+        "description": "An image printed in black and white, like a newspaper photo. Use the image you are given; never invent a src. caption says what it shows in one sentence; credit names the source (e.g. \"Screenshot of example.com\")."
+      },
+      "Lede": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "The opening paragraph of the story, set large with a drop cap. 3 to 5 sentences."
+      },
+      "Section": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Prose"
+                },
+                {
+                  "$ref": "#/$defs/PullQuote"
+                },
+                {
+                  "$ref": "#/$defs/Exchange"
+                },
+                {
+                  "$ref": "#/$defs/Positions"
+                },
+                {
+                  "$ref": "#/$defs/LeadArt"
+                },
+                {
+                  "$ref": "#/$defs/ArticleSummary"
+                },
+                {
+                  "$ref": "#/$defs/ArticleQuote"
+                },
+                {
+                  "$ref": "#/$defs/KeyPoints"
+                },
+                {
+                  "$ref": "#/$defs/OpenQuestions"
+                },
+                {
+                  "$ref": "#/$defs/ReadingList"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "blocks"
+        ],
+        "additionalProperties": false,
+        "description": "A titled part of the story or sidebar. In the Story its text is set in two columns."
+      },
+      "Prose": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "cites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Quote"
+            }
+          },
+          "terms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Term"
+            }
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "A paragraph in the editor's voice: report and paraphrase, the way a newspaper does. Plain text, no markdown. To quote a commenter, write {1}, {2}… where their words go and list the Quotes in cites (each excerpt a short phrase or sentence); the page prints the excerpt in quotation marks with the commenter's name. Never type quoted words or quotation marks around someone's words yourself. Terms are marked inline and defined after the paragraph."
+      },
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "excerpt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
+      },
+      "Term": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "term",
+          "definition"
+        ],
+        "additionalProperties": false,
+        "description": "A word in a Prose text to define for the reader. term must appear exactly in the text. The definition is added context and is shown apart from the thread."
+      },
+      "PullQuote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "excerpt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate."
+      },
+      "Exchange": {
+        "type": "object",
+        "properties": {
+          "quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Quote"
+            }
+          }
+        },
+        "required": [
+          "quotes"
+        ],
+        "additionalProperties": false,
+        "description": "A back-and-forth printed as a transcript. Use rarely: usually it reads better told in Prose with cites. Each quote must be a direct reply to the one before it, or nothing renders."
+      },
+      "Positions": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Side"
+            }
+          }
+        },
+        "required": [
+          "question",
+          "sides"
+        ],
+        "additionalProperties": false,
+        "description": "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner."
+      },
+      "Side": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Quote"
+            }
+          }
+        },
+        "required": [
+          "label",
+          "summary",
+          "quotes"
+        ],
+        "additionalProperties": false,
+        "description": "One side of a disagreement: a short label, a one-sentence summary, and the comments that argue it."
+      },
+      "ArticleSummary": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "points"
+        ],
+        "additionalProperties": false,
+        "description": "What the linked article says, as short points, kept visibly apart from what commenters said."
+      },
+      "ArticleQuote": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "A quote from the linked article. Must be copied exactly from the article, or nothing renders."
+      },
+      "KeyPoints": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "A numbered summary box: 3 to 5 one-sentence takeaways."
+      },
+      "OpenQuestions": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Question"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "Questions the thread raised and didn't settle."
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "question",
+          "id"
+        ],
+        "additionalProperties": false,
+        "description": "A question the thread left unsettled, and the id of the comment that raised it."
+      },
+      "ReadingList": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ResourceGroup"
+            }
+          }
+        },
+        "required": [
+          "groups"
+        ],
+        "additionalProperties": false,
+        "description": "Links and tools from the thread, grouped. Credits who mentioned each one."
+      },
+      "ResourceGroup": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Resource"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": "A titled group of resources."
+      },
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "note"
+        ],
+        "additionalProperties": false,
+        "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
+      },
+      "Sidebar": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/KeyPoints"
+                },
+                {
+                  "$ref": "#/$defs/Section"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ],
+        "additionalProperties": false,
+        "description": "The column beside the story: KeyPoints, then Sections for open questions and reading."
+      },
+      "Colophon": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "description": "The closing note on how the edition was made. Always last."
+      }
+    }
+  },
+  "promptOptions": {
+    "preamble": "You are the editor of Hackerpaper, which turns a Hacker News thread into a well-edited newspaper page. You are given the thread (every comment with its id), the article the story links to, and images you may print. Write one edition in OpenUI Lang. Write nothing but the program.",
+    "additionalRules": [
+      "The page renders while you write, so start with exactly this skeleton, in this order, then continue in reading order (Story and its contents top to bottom, then Sidebar, then Colophon), defining each name right after the line that first uses it:\nroot = Edition([headline, map, story, sidebar, colophon])\nheadline = Headline(...)\ntimeline = Query(\"get_comment_timeline\", {id: <story id>}, {comments: []})\nmap = ThreadMap(timeline.comments)\nEvery edition has the ThreadMap.",
+      "Write like a New York Times news analysis: open the Lede on a concrete scene, follow with a paragraph on why the thread matters, and tell the story of the thread in your own words. Most of the page should be Prose.",
+      "Use newspaper style: short, plain section titles; full name at first mention, surname after; numerals for 10 and above; no exclamation marks; restrained attribution (\"one reader replied\").",
+      "Refer to commenters by role (\"one reader\", \"a developer who built a similar site\"), never by username in the text; the Quote credit already names them. The only people named in the text are the story's author and people named in the article.",
+      "Don't assume anyone's gender: avoid he/she for commenters or the author unless the thread or article states their pronouns; repeat the name or rephrase instead.",
+      "Quote generously: aim for two or three cited phrases in most Prose paragraphs.",
+      "Never write words for a commenter. Quote people only through Prose cites, PullQuote or Exchange, by comment id; every excerpt must be copied exactly from that comment. Prefer short cited phrases in Prose; at most one or two PullQuotes, Exchange rarely.",
+      "Only use comment ids and link urls that appear in the thread. Only state facts found in the thread or the article.",
+      "Anything that is not from the thread or the article (definitions, background) goes in a Term.",
+      "Present disagreements as Positions; never say which side is right.",
+      "get_comment_timeline is the only tool. Never write thread data by hand; the ThreadMap marks quoted comments on its own.",
+      "If Images lists a fitting image, open the Story with a LeadArt using its src and credit exactly. LeadArt may only use a listed image; if none fits, leave LeadArt out."
+    ],
+    "tools": [
+      {
+        "name": "get_comment_timeline",
+        "description": "The shape of an HN thread: every comment's id, the id it replies to, its reply depth (0 = top level), and hours since the post.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "The HN story id"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "parent": {
+                    "type": "number"
+                  },
+                  "depth": {
+                    "type": "number"
+                  },
+                  "hours": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
+    "toolCalls": true,
+    "bindings": false,
+    "builtinFunctions": false
+  }
+}
