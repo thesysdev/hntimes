@@ -1,7 +1,7 @@
 // Checks an OpenUI Lang edition: it must parse against the Hackerpaper catalog, include the thread
 // map, and every quote must come from the thread (known comment id, verbatim excerpt).
 // Regenerate the schema first: npx @openuidev/cli generate components/paper/library.tsx --json-schema --out generated/schema.json
-// Usage: node scripts/check-edition.mjs editions/50319510.oui   (or a file in runs/)
+// Usage: node scripts/check-edition.mjs runs/<file>.oui
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { createParser } from "@openuidev/react-lang";
@@ -11,11 +11,11 @@ if (!file) throw new Error("usage: node scripts/check-edition.mjs <edition.oui>"
 
 const schema = JSON.parse(await readFile("generated/schema.json", "utf8"));
 const program = await readFile(file, "utf8");
-// The story id leads the file name: editions/50319510.oui or runs/50319510--<time>--<model>.oui.
-// Its thread is the snapshot the edition was written from (snapshots/), or a fixture (data/).
+// The story id leads the file name: runs/<id>--<time>--<model>.oui.
+// Its thread is the snapshot the edition was written from (snapshots/).
 const storyId = basename(file).match(/^\d+/)?.[0];
 const thread = JSON.parse(
-  await readFile(`snapshots/${storyId}.json`, "utf8").catch(() => readFile(`data/${storyId}.json`, "utf8")),
+  await readFile(`snapshots/${storyId}.json`, "utf8"),
 );
 const result = createParser(schema, "Edition").parse(program);
 const problems = [...(result.meta?.errors ?? [])];
