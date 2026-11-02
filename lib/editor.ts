@@ -12,7 +12,7 @@ import { selectComments } from "./thread-prompt";
 // 2. otherwise an image search with the editor's queries.
 
 /** The kinds of story an edition can be. Each has its own layout in the writer's prompt. */
-export const SHAPES = ["debate", "review", "advice", "postmortem", "launch", "explainer"] as const;
+export const SHAPES = ["discussion", "debate", "review", "advice", "postmortem", "launch", "explainer"] as const;
 export type Shape = (typeof SHAPES)[number];
 
 export type SearchPlan =
@@ -63,13 +63,13 @@ const INSTRUCTIONS = `You are the assignment editor of a newspaper that covers H
 Reply with JSON only:
 {
   "shape": one of ${SHAPES.map((s) => `"${s}"`).join(", ")},
-  "angle": "the news in one sentence of at most 25 words: what happened, and what readers are fighting about or learned",
+  "angle": "one sentence of at most 30 words: what the link is and its main point, then how readers took it",
   "headline": "a working headline in a magazine's manner: two to six words, a phrase, image or light pun",
   "hook": "one sentence: the irony, contradiction or human detail that makes this thread worth reading",
   "cast": [{"id": comment id, "who": "at most 8 words: who they are, from what they say about themselves"}],
   "moments": [{"id": comment id, "why": "at most 8 words"}]
 }
-Shapes: debate (the thread splits into camps), review (Show HN or a product people tried), advice (Ask HN, readers answering), postmortem (an outage, failure or incident), launch (a release or announcement with numbers), explainer (a technical idea people worked through).
+Shapes: discussion (the default: readers reacting in several directions without one central fight; most threads are this), debate (only when the thread splits into camps over one question, with several comments on each side), review (Show HN or a product people tried), advice (Ask HN, readers answering), postmortem (an outage, failure or incident), launch (a release or announcement with numbers), explainer (a technical idea people worked through).
 Cast: 3 to 6 people the story should be told through, by one of their comments. Prefer people with standing: the poster, people who say they built, work at, or used the thing, and the sharpest critics. "who" uses only what they say about themselves or what they argue ("a critic of the benchmark", "says they maintain a fork").
 Moments: the 3 best lines in the thread: the funniest, the sharpest, the most human, or the one that ended an argument. Prefer lines a reader would repeat to a friend.
 Only use comment ids that appear in the thread.`;
@@ -97,7 +97,7 @@ function briefing(thread: Thread): string {
 /** When the editor pass fails: a plain story with the title as the image search. */
 function fallback(thread: Thread): EditorNotes {
   return {
-    shape: "explainer",
+    shape: "discussion",
     angle: thread.story.title,
     headline: thread.story.title,
     hook: "",
@@ -139,7 +139,7 @@ export async function planEdition(thread: Thread): Promise<EditorNotes> {
     const kind = image.kind === "photo" || image.kind === "diagram" ? image.kind : "screenshot";
 
     return {
-      shape: SHAPES.includes(json.shape as Shape) ? (json.shape as Shape) : "explainer",
+      shape: SHAPES.includes(json.shape as Shape) ? (json.shape as Shape) : "discussion",
       angle: String(json.angle ?? thread.story.title),
       headline: String(json.headline ?? thread.story.title),
       hook: String(json.hook ?? ""),
