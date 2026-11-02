@@ -3,7 +3,7 @@
 import { parseMessage } from "@openuidev/lang-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Thread } from "@/lib/thread";
-import { type Desk, Dispatch } from "./Dispatch";
+import { type Desk, Dispatch, StillBuilding, TooQuiet } from "./Dispatch";
 import { EditionRenderer } from "./EditionRenderer";
 import { HighlightProvider } from "./Highlight";
 import styles from "./LiveEdition.module.css";
@@ -23,6 +23,8 @@ type EditionEvent =
   | { type: "warning"; message: string }
   | { type: "text"; delta: string }
   | { type: "done"; model: string; ms: number; firstTokenMs: number }
+  | { type: "building"; readyIn: number }
+  | { type: "quiet" }
   | { type: "error"; message: string };
 
 // Timings, sources, the raw program and a rerun button are for development; readers get the paper.
@@ -64,14 +66,28 @@ function programOf(raw: string, streaming: boolean): string {
   return content.replace(/^\s*```[\w-]*\n/, "").replace(/\n?```\s*$/, "");
 }
 
+/** Why there's no edition to show: the story is too young, or its thread too quiet. */
+type Notice = { type: "building"; readyIn: number } | { type: "quiet" };
+
 /**
- * The edition for one story: gathered and written through /api/edition as soon as the page opens,
- * and rendered as it streams. A control strip shows progress and can write it again.
+ * The edition for one story. A cached edition (`initial`) renders at once; otherwise it's written
+ * (or joined while being written) through /api/edition as soon as the page opens, and rendered as
+ * it streams. In development a control strip shows progress and can write it again.
  */
-export function LiveEdition({ storyId, replay = false }: { storyId: string; replay?: boolean }) {
-  const [thread, setThread] = useState<Thread | null>(null);
-  const [program, setProgram] = useState("");
-  const [status, setStatus] = useState<Status>("working");
+export function LiveEdition({
+  storyId,
+  replay = false,
+  initial,
+}: {
+  storyId: string;
+  replay?: boolean;
+  /** An edition already written, from the cache. */
+  initial?: { program: string; thread: Thread };
+}) {
+  const [thread, setThread] = useState<Thread | null>(initial?.thread ?? null);
+  const [program, setProgram] = useState(initial?.program ?? "");
+  const [status, setStatus] = useState<Status>(initial ? "done" : "working");
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [message, setMessage] = useState("Starting…");
   const [sources, setSources] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -147,6 +163,9 @@ export function LiveEdition({ storyId, replay = false }: { storyId: string; repl
               setProgram(programOf(raw, false));
               setMessage(`${e.model} · first text ${(e.firstTokenMs / 1000).toFixed(1)}s`);
               setStatus("done");
+            } else if (e.type === "building" || e.type === "quiet") {
+              setNotice(e);
+              setStatus("done");
             } else if (e.type === "error") throw new Error(e.message);
           }
         }
@@ -159,14 +178,16 @@ export function LiveEdition({ storyId, replay = false }: { storyId: string; repl
     [storyId, replay],
   );
 
-  // Write the edition as soon as the page opens; leaving the page cancels it.
+  // Write the edition as soon as the page opens (unless it came from the cache); leaving the page
+  // stops following it.
   useEffect(() => {
+    if (initial) return;
     const controller = new AbortController();
     abort.current = controller;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- run() only sets state after its first await (the request)
     run(controller);
     return () => controller.abort();
-  }, [run]);
+  }, [run, initial]);
 
   function writeAgain() {
     abort.current?.abort();
@@ -226,6 +247,10 @@ export function LiveEdition({ storyId, replay = false }: { storyId: string; repl
       )}
       {isDev && showProgram && <pre className={styles.program}>{program}</pre>}
       {status === "working" && !(thread && program) && <Dispatch desk={desk} />}
+      {notice?.type === "building" && (
+        <StillBuilding title={desk.story?.title ?? "This story"} readyIn={notice.readyIn} />
+      )}
+      {notice?.type === "quiet" && <TooQuiet title={desk.story?.title ?? "This story"} />}
       {thread && program && (
         <ThreadProvider thread={thread}>
           <HighlightProvider>

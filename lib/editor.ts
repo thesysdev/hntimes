@@ -6,7 +6,7 @@ import { getComment, plainText, type Thread } from "./thread";
 // and what the lead art should show. The writer gets these as notes. It runs alongside the
 // article fetch, so the edition only waits on it when it takes longer than the article.
 //
-// Lead art is then chosen in two ways, resolved by the edition route:
+// Lead art (off for now) is then chosen in two ways, resolved by the edition route:
 // 1. the article's own preview image, if it's a real one (isGenericImage weeds out logos and cards);
 // 2. otherwise an image search with the editor's queries.
 
@@ -50,6 +50,12 @@ const COMMENT_CHARS = 400;
 /** The editor reads at most this much of the thread. Its time goes on writing the brief, not reading. */
 const THREAD_CHARS = 60_000;
 
+// Images are off for now, so the brief doesn't ask for image queries (they cost output time). To bring
+// them back, add to the JSON: "image": {"kind": "screenshot" | "photo" | "diagram" | "none", "queries": [up to 2 strings]}
+// and the rule: Image: name the concrete thing the story is about (product, project, site, place or
+// object). screenshot for software and websites, photo for physical things and places, diagram for
+// technical ideas. No faces unless the story is about a well-known public figure. "none" with no
+// queries when the subject is abstract (advice, opinions, career questions).
 const INSTRUCTIONS = `You are the assignment editor of a newspaper that covers Hacker News threads. Read the thread and brief the reporter.
 Reply with JSON only:
 {
@@ -57,13 +63,11 @@ Reply with JSON only:
   "angle": "the news in one sentence of at most 25 words: what happened, and what readers are fighting about or learned",
   "headline": "a working headline: concrete subject, active verb, under 12 words",
   "cast": [{"id": comment id, "who": "at most 8 words: who they are, from what they say about themselves"}],
-  "moments": [{"id": comment id, "why": "at most 8 words"}],
-  "image": {"kind": "screenshot" | "photo" | "diagram" | "none", "queries": [up to 2 strings]}
+  "moments": [{"id": comment id, "why": "at most 8 words"}]
 }
 Shapes: debate (the thread splits into camps), review (Show HN or a product people tried), advice (Ask HN, readers answering), postmortem (an outage, failure or incident), launch (a release or announcement with numbers), explainer (a technical idea people worked through).
 Cast: 3 to 6 people the story should be told through, by one of their comments. Prefer people with standing: the poster, people who say they built, work at, or used the thing, and the sharpest critics. "who" uses only what they say about themselves or what they argue ("a critic of the benchmark", "says they maintain a fork"). Never guess gender.
 Moments: 3 comments that turned the conversation: a correction, an insider detail, a sharp objection, a funny or telling line.
-Image: name the concrete thing the story is about (product, project, site, place or object). screenshot for software and websites, photo for physical things and places, diagram for technical ideas. No faces unless the story is about a well-known public figure. "none" with no queries when the subject is abstract (advice, opinions, career questions).
 Only use comment ids that appear in the thread.`;
 
 /** The thread as the editor reads it: the story, then each comment cut short. */

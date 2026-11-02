@@ -31,7 +31,9 @@ export const promptOptions: PromptOptions = {
     "Anything that is not from these sources (definitions, background) goes in a Term.",
     "Present disagreements fairly; never say which side is right.",
     "get_comment_timeline is the only tool. Never write thread data by hand; the ThreadMap marks quoted comments on its own.",
-    "If Images lists a fitting image, open the Story with a LeadArt using its src and credit exactly. LeadArt may only use a listed image; if none fits, leave LeadArt out.",
+    "This edition has no images: never use LeadArt.",
+    // Images are off for now. When they're back, replace the rule above with:
+    // "If Images lists a fitting image, open the Story with a LeadArt using its src and credit exactly. LeadArt may only use a listed image; if none fits, leave LeadArt out.",
   ],
   // Editions only read data: no $variables, mutations or built-in functions.
   tools: [commentTimelineSpec],

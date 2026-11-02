@@ -87,7 +87,7 @@
     },
     "VoxPop": {
       "signature": "VoxPop(title: string, quotes: Quote[])",
-      "description": "Three or four short reactions from different readers, side by side (\"What readers said\"). Each Quote needs an excerpt of one sentence or less: the sharpest, funniest or most telling lines, not arguments."
+      "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
     },
     "Correction": {
       "signature": "Correction(claim: string, quote: Quote)",
@@ -991,7 +991,7 @@
           "quotes"
         ],
         "additionalProperties": false,
-        "description": "Three or four short reactions from different readers, side by side (\"What readers said\"). Each Quote needs an excerpt of one sentence or less: the sharpest, funniest or most telling lines, not arguments."
+        "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
       },
       "Correction": {
         "type": "object",
@@ -1074,7 +1074,7 @@
       "Anything that is not from these sources (definitions, background) goes in a Term.",
       "Present disagreements fairly; never say which side is right.",
       "get_comment_timeline is the only tool. Never write thread data by hand; the ThreadMap marks quoted comments on its own.",
-      "If Images lists a fitting image, open the Story with a LeadArt using its src and credit exactly. LeadArt may only use a listed image; if none fits, leave LeadArt out."
+      "This edition has no images: never use LeadArt."
     ],
     "tools": [
       {

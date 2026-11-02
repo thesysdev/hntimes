@@ -199,3 +199,24 @@ export async function fetchProfiles(names: string[]): Promise<Record<string, Pro
   const profiles = await Promise.all(names.map(async (name) => [name, await fetchProfile(name)] as const));
   return Object.fromEntries(profiles.filter((entry): entry is [string, Profile] => entry[1] !== null));
 }
+
+export type Story = { id: number; time: number; comments: number; title: string; url: string | null; author: string };
+
+/**
+ * A story's headline facts, from a light Algolia lookup (not the whole thread). Null when the id
+ * isn't a story: a comment, job, poll, or nothing at all. Ask HN and Show HN posts are stories.
+ */
+export async function fetchStory(id: number): Promise<Story | null> {
+  const query = new URLSearchParams({ tags: `story,story_${id}`, hitsPerPage: "1" });
+  const { hits } = await getJson<{ hits: AlgoliaHit[] }>(`https://hn.algolia.com/api/v1/search?${query}`);
+  const hit = hits.find((h) => Number(h.objectID) === id);
+  if (!hit) return null;
+  return {
+    id,
+    time: hit.created_at_i,
+    comments: hit.num_comments ?? 0,
+    title: hit.title,
+    url: hit.url,
+    author: hit.author,
+  };
+}

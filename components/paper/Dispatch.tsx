@@ -38,3 +38,42 @@ export function Dispatch({ desk }: { desk: Desk }) {
     </section>
   );
 }
+
+/**
+ * A story too young to report: the thread is still taking shape, so no edition is written until
+ * it's an hour old.
+ */
+export function StillBuilding({ title, readyIn }: { title: string; /** Seconds until it's an hour old. */ readyIn: number }) {
+  const minutes = Math.max(1, Math.ceil(readyIn / 60));
+  return (
+    <section className={styles.dispatch}>
+      <p className={styles.kicker}>
+        <span className={styles.pulse} aria-hidden />
+        Developing story
+      </p>
+      <h1 className={styles.title} data-draft>
+        {title}
+      </h1>
+      <p className={styles.dek}>
+        This story is still building. Come back as it develops: the first edition is written once the
+        discussion is an hour old, in about {minutes} {minutes === 1 ? "minute" : "minutes"}.
+      </p>
+    </section>
+  );
+}
+
+/** A story with too little discussion to report on (yet). */
+export function TooQuiet({ title }: { title: string }) {
+  return (
+    <section className={styles.dispatch}>
+      <p className={styles.kicker}>Quiet thread</p>
+      <h1 className={styles.title} data-draft>
+        {title}
+      </h1>
+      <p className={styles.dek}>
+        There isn&rsquo;t enough of a conversation here to report on yet. Come back once readers have had
+        their say.
+      </p>
+    </section>
+  );
+}

@@ -11,6 +11,9 @@
   "dependencies": {
     "@openuidev/lang-core": "1.0.2",
     "@openuidev/react-lang": "1.0.2",
+    "@upstash/redis": "^1.41.0",
+    "@vercel/blob": "^2.8.2",
+    "botid": "^1.5.12",
     "next": "16.4.4",
     "openai": "^7.47.0",
     "react": "19.3.0",

@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FrontPage, FrontPageSkeleton, LeadConversation, Masthead, PaperFrame } from "@/components/paper";
+import { cachedFor, FRONT_PAGE_TTL, keys } from "@/lib/cache";
 import { fetchFrontPage, fetchThread } from "@/lib/hn";
 import { plainText } from "@/lib/thread";
 import { getCommentTimeline } from "@/lib/tools";
@@ -19,7 +20,8 @@ export default function Home() {
 async function Stories() {
   // The front page is live: ranked and dated at request time, never prerendered.
   await connection();
-  const stories = await fetchFrontPage();
+  // Cached for 15 minutes in production (lib/cache.ts).
+  const stories = await cachedFor(keys.frontPage, FRONT_PAGE_TTL, fetchFrontPage);
   const lead = stories[0];
   return (
     <FrontPage
@@ -38,6 +40,11 @@ async function Stories() {
 
 /** The lead story's thread map and most-replied top-level comment; nothing if the thread can't be read. */
 async function Lead({ id }: { id: number }) {
+  const lead = await cachedFor(`${keys.frontPage}:lead:${id}`, FRONT_PAGE_TTL, () => leadConversation(id));
+  return lead && <LeadConversation id={id} comments={lead.comments} top={lead.top} />;
+}
+
+async function leadConversation(id: number) {
   const fetched = await fetchThread(String(id)).catch(() => null);
   if (!fetched) return null;
   const { thread } = fetched;
@@ -47,11 +54,8 @@ async function Lead({ id }: { id: number }) {
     .sort((a, b) => b.replies - a.replies)[0];
   const text = top ? plainText(top.html).split("\n\n")[0] : "";
   const quote = text.length > 280 ? `${text.slice(0, 280)}…` : text;
-  return (
-    <LeadConversation
-      id={id}
-      comments={getCommentTimeline(thread, { id }).comments}
-      top={top ? { id: top.id, author: top.author, replies: top.replies, text: quote } : null}
-    />
-  );
+  return {
+    comments: getCommentTimeline(thread, { id }).comments,
+    top: top ? { id: top.id, author: top.author, replies: top.replies, text: quote } : null,
+  };
 }

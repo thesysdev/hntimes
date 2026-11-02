@@ -46,6 +46,9 @@ next-env.d.ts
 .idea/
 *.log
 
+# the cache in local production builds (on Vercel it lives in Upstash Redis and Vercel Blob)
+/.cache
+
 # editions written by /api/edition, and the thread snapshots they were written from
 /runs
 /snapshots
