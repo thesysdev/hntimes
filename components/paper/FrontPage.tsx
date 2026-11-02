@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { coverable } from "@/lib/cache";
 import type { FrontPageStory } from "@/lib/hn";
-import { hnItemUrl } from "@/lib/thread";
 import { LeadThread, type TopComment } from "./LeadThread";
 import type { ThreadShapeComment } from "@/lib/tools";
 import styles from "./FrontPage.module.css";
@@ -28,35 +27,11 @@ const SECTIONS = [
   { name: "Ask HN", prefix: /^(Ask|Tell) HN:\s*/ },
 ] as const;
 
-/** A story as placed on the page: its HN section, its headline, and whether it has an edition. */
-type Placed = FrontPageStory & { section: string | null; headline: string; covered: boolean };
+type Placed = FrontPageStory & { section: string | null; headline: string };
 
 function place(story: FrontPageStory): Placed {
   const section = SECTIONS.find((s) => s.prefix.test(story.title));
-  return {
-    ...story,
-    section: section?.name ?? null,
-    headline: section ? story.title.replace(section.prefix, "") : story.title,
-    covered: coverable(story),
-  };
-}
-
-/**
- * A story's headline link: to its edition, or, for a story without one yet (too new, or too little
- * discussion), to the thread on Hacker News, so no headline leads to an empty page.
- */
-function StoryLink({ story, className }: { story: Placed; className?: string }) {
-  if (story.covered)
-    return (
-      <Link href={`/item?id=${story.id}`} className={className}>
-        {story.headline}
-      </Link>
-    );
-  return (
-    <a href={hnItemUrl(story.id)} className={className} title="No edition yet: read the thread on Hacker News">
-      {story.headline}
-    </a>
-  );
+  return { ...story, section: section?.name ?? null, headline: section ? story.title.replace(section.prefix, "") : story.title };
 }
 
 function Byline({ story }: { story: Placed }) {
@@ -65,7 +40,6 @@ function Byline({ story }: { story: Placed }) {
     <p className={styles.byline}>
       {story.points} points · {story.comments} comments · {ageOf(story.time)}
       {domain && <> · {domain}</>}
-      {!story.covered && <span className={styles.developing}> · Developing: on HN ↗</span>}
     </p>
   );
 }
@@ -80,10 +54,10 @@ function Headline({
   children?: React.ReactNode;
 }) {
   return (
-    <article className={styles[size]} data-covered={story.covered || undefined}>
+    <article className={styles[size]}>
       {size !== "brief" && story.section && <p className={styles.kicker}>{story.section}</p>}
       <h2 className={styles[`${size}Title`]}>
-        <StoryLink story={story} />
+        <Link href={`/item?id=${story.id}`}>{story.headline}</Link>
       </h2>
       <Byline story={story} />
       {children}
@@ -96,27 +70,18 @@ export function LeadConversation({
   id,
   comments,
   top,
-  covered,
 }: {
   id: number;
   comments: ThreadShapeComment[];
   top: TopComment | null;
-  /** Whether the story has an edition yet (see coverable in lib/cache.ts). */
-  covered: boolean;
 }) {
   if (comments.length === 0) return null;
   return (
     <>
       <LeadThread comments={comments} top={top} />
-      {covered ? (
-        <Link href={`/item?id=${id}`} className={styles.read}>
-          Read the edition →
-        </Link>
-      ) : (
-        <a href={hnItemUrl(id)} className={styles.read}>
-          The edition is still developing. Read the thread on HN ↗
-        </a>
-      )}
+      <Link href={`/item?id=${id}`} className={styles.read}>
+        Read the edition →
+      </Link>
     </>
   );
 }
@@ -131,7 +96,9 @@ function MostDiscussed({ stories }: { stories: Placed[] }) {
       <ol>
         {top.map((story) => (
           <li key={story.id}>
-            <StoryLink story={story} className={styles.barLabel} />
+            <Link href={`/item?id=${story.id}`} className={styles.barLabel}>
+              {story.headline}
+            </Link>
             <span className={styles.bar} style={{ "--share": story.comments / most } as React.CSSProperties}>
               <span className={styles.barValue}>{story.comments.toLocaleString("en-US")}</span>
             </span>
@@ -149,7 +116,9 @@ function MostDiscussed({ stories }: { stories: Placed[] }) {
  * opens that story's edition at /item?id=…, as on HN.
  */
 export function FrontPage({ stories, lead: conversation }: { stories: FrontPageStory[]; lead?: React.ReactNode }) {
-  const placed = stories.map(place);
+  // Only stories with an edition (see coverable in lib/cache.ts): too new or too quiet ones are left
+  // off, so every headline opens a page.
+  const placed = stories.filter((story) => coverable(story)).map(place);
   const [lead, ...rest] = placed;
   if (!lead) return <p className={styles.empty}>The front page is empty right now.</p>;
   const seconds = rest.slice(0, 3);

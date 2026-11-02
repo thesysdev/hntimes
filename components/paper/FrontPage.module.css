@@ -23,16 +23,6 @@
   text-underline-offset: 0.12em;
 }
 
-/* A story without an edition yet: its headline in the paper's second ink, the reason in the byline. */
-.developing {
-  color: var(--accent-ink);
-  font-weight: 600;
-}
-
-article:not([data-covered]) h2 a {
-  color: var(--ink-2);
-}
-
 .byline {
   font-family: var(--font-ui);
   font-size: var(--step--2);
