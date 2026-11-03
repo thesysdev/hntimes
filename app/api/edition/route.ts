@@ -8,6 +8,7 @@ import { type EditionEvent, REASONING, type Reasoning, writeEdition } from "@/li
 import { fetchStory } from "@/lib/hn";
 import { bareProgram, follow, replay, startOrJoin } from "@/lib/live";
 import { loadSnapshot, saveSnapshot } from "@/lib/snapshots";
+import { repairQuotes } from "@/lib/thread";
 import { editionView, writerView } from "@/lib/thread-view";
 
 // POST /api/edition {url}: a story's edition as NDJSON events (see EditionEvent in lib/generate.ts).
@@ -119,9 +120,9 @@ function freshEdition(request: Request, id: string, body: { model?: unknown; rea
       while (queue.length > 0) yield queue.shift()!;
     }
     try {
-      const { program, label, ms, firstTokenMs } = await written;
+      const { program, thread, label, ms, firstTokenMs } = await written;
       yield { type: "done", model: label, ms, firstTokenMs };
-      await saveRun(id, label, program, `first token +${firstTokenMs}ms, done +${ms}ms`);
+      await saveRun(id, label, repairQuotes(bareProgram(program), thread), `first token +${firstTokenMs}ms, done +${ms}ms`);
     } catch (error) {
       yield { type: "error", message: error instanceof Error ? error.message : String(error) };
     }
@@ -133,11 +134,11 @@ function freshEdition(request: Request, id: string, body: { model?: unknown; rea
  * Keeps each edition written in development in runs/ (git-ignored) as a bare program named
  * <story id>--<time>--<model>.oui, so it can be checked: node scripts/check-edition.mjs runs/<file>
  */
-async function saveRun(id: string, label: string, raw: string, timing: string) {
+async function saveRun(id: string, label: string, program: string, timing: string) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const file = path.join(process.cwd(), "runs", `${id}--${stamp}--${label.replace(/[^\w.-]+/g, "_")}.oui`);
   await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, `${bareProgram(raw)}\n`);
+  await writeFile(file, `${program}\n`);
   console.log(`[edition ${id}] saved ${path.relative(process.cwd(), file)} (${timing})`);
 }
 

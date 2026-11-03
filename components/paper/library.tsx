@@ -243,7 +243,7 @@ const FactBoxBlock = defineComponent({
     facts: z.array(FactPart.ref),
   }),
   description:
-    'Large figures that carry the story ("By the numbers"), 2 to 4 Facts. Only for stories with real numbers in the article or thread.',
+    'Large figures that carry the news ("By the numbers"), 2 to 4 Facts: real-world measurements, counts, prices or dates, each label clear on its own. Never details from inside a work of fiction.',
   component: ({ props }) => <FactBox title={props.title} facts={props.facts.map((f) => f.props)} />,
 });
 

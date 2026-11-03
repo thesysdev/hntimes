@@ -7,9 +7,8 @@ import {
   hnUserUrl,
   hoursAfterPost,
   isReplyChain,
-  isVerbatim,
   paragraphs,
-  plainText,
+  quotedComment,
 } from "@/lib/thread";
 import { useThread } from "./ThreadContext";
 import { HighlightTarget } from "./Highlight";
@@ -21,10 +20,9 @@ export type QuoteRef = {
   excerpt?: string;
 };
 
-/** The words to show for a comment: the excerpt if it's verbatim, otherwise the whole comment. */
+/** The words to show: the excerpt (already checked by quotedComment), or the whole comment. */
 function quotedText(comment: Comment, excerpt?: string): string[] {
-  if (excerpt && isVerbatim(plainText(comment.html), excerpt)) return [excerpt];
-  return paragraphs(comment.html);
+  return excerpt ? [excerpt] : paragraphs(comment.html);
 }
 
 function Byline({ thread, comment }: { thread: Thread; comment: Comment }) {
@@ -47,11 +45,11 @@ function Byline({ thread, comment }: { thread: Thread; comment: Comment }) {
 /** A display quote. Unknown ids render nothing. */
 export function PullQuote({ id, excerpt }: QuoteRef) {
   const thread = useThread();
-  const comment = getComment(thread, id);
+  const comment = quotedComment(thread, id, excerpt);
   if (!comment) return null;
   return (
     // data-pull: placed between sections, the quote breaks out across the story (Paper.module.css).
-    <HighlightTarget id={id} className={styles.pull} data-pull>
+    <HighlightTarget id={comment.id} className={styles.pull} data-pull>
       <figure>
         <blockquote>
           {quotedText(comment, excerpt).map((p, i) => (
@@ -97,12 +95,12 @@ export function Exchange({ quotes }: { quotes: QuoteRef[] }) {
  */
 export function Cite({ id, excerpt, paragraph = "" }: QuoteRef & { paragraph?: string }) {
   const thread = useThread();
-  const comment = getComment(thread, id);
-  if (!comment || !excerpt || !isVerbatim(plainText(comment.html), excerpt)) return null;
+  const comment = excerpt ? quotedComment(thread, id, excerpt) : null;
+  if (!comment || !excerpt) return null;
   const named = paragraph.includes(comment.author);
   return (
-    <HighlightTarget id={id} inline className={styles.cite}>
-      <a href={hnItemUrl(id)} className={styles.citeQuote} title={`${comment.author}'s comment on Hacker News`}>
+    <HighlightTarget id={comment.id} inline className={styles.cite}>
+      <a href={hnItemUrl(comment.id)} className={styles.citeQuote} title={`${comment.author}'s comment on Hacker News`}>
         “{excerpt}”
       </a>
       {!named && (
@@ -123,14 +121,14 @@ function opening(comment: Comment, max = 220): string {
   return stop > max / 3 ? cut.slice(0, stop + 1) : `${cut.replace(/\s+\S*$/, "")}…`;
 }
 
-/** A short attributed excerpt, used inside other components. Without a verbatim excerpt, the comment's opening. */
+/** A short attributed excerpt, used inside other components. Without an excerpt, the comment's opening. */
 export function Citation({ id, excerpt }: QuoteRef) {
   const thread = useThread();
-  const comment = getComment(thread, id);
+  const comment = quotedComment(thread, id, excerpt);
   if (!comment) return null;
-  const text = excerpt && isVerbatim(plainText(comment.html), excerpt) ? excerpt : opening(comment);
+  const text = excerpt ?? opening(comment);
   return (
-    <HighlightTarget id={id} className={styles.citation}>
+    <HighlightTarget id={comment.id} className={styles.citation}>
       <p>{text}</p>
       <a href={hnUserUrl(comment.author)} className={styles.citationAuthor}>
         {comment.author}

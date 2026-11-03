@@ -67,6 +67,36 @@ export function isVerbatim(source: string, excerpt: string): boolean {
   return normalize(source).includes(normalize(excerpt));
 }
 
+/**
+ * The comment a quote comes from. Its excerpt must appear word for word in it. If it doesn't (the
+ * model slipped a digit in the id), the one comment it does appear in, when there's exactly one.
+ * Otherwise null: a quote that can't be placed is never shown, and never shown as someone else's.
+ */
+export function quotedComment(thread: Thread, id: number, excerpt?: string): Comment | null {
+  const comment = getComment(thread, id);
+  if (!excerpt) return comment;
+  if (comment && isVerbatim(plainText(comment.html), excerpt)) return comment;
+  const matches = thread.order.filter((cid) => isVerbatim(plainText(thread.comments[cid].html), excerpt));
+  return matches.length === 1 ? thread.comments[matches[0]] : null;
+}
+
+/**
+ * The program with each quote's id corrected by quotedComment, so stored editions (and their map)
+ * point at the comment each excerpt really came from.
+ */
+export function repairQuotes(program: string, thread: Thread): string {
+  return program.replace(/\b(Quote|PullQuote)\((\d+), "((?:[^"\\]|\\.)*)"/g, (match, kind: string, id: string, raw: string) => {
+    let excerpt: string;
+    try {
+      excerpt = JSON.parse(`"${raw}"`) as string;
+    } catch {
+      return match;
+    }
+    const comment = quotedComment(thread, Number(id), excerpt);
+    return comment && comment.id !== Number(id) ? `${kind}(${comment.id}, "${raw}"` : match;
+  });
+}
+
 /** True when each comment replies directly to the one before it. */
 export function isReplyChain(thread: Thread, ids: number[]): boolean {
   return ids.every((id, i) => {

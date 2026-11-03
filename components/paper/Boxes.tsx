@@ -1,4 +1,4 @@
-import { getComment, hnItemUrl, hnUserUrl, isVerbatim, plainText } from "@/lib/thread";
+import { getComment, hnItemUrl, hnUserUrl, quotedComment } from "@/lib/thread";
 import { HighlightTarget } from "./Highlight";
 import type { QuoteRef } from "./Quote";
 import { useThread } from "./ThreadContext";
@@ -125,8 +125,8 @@ export function Cast({ title, people }: { title: string; people: { id: number; w
 function useVerified(quotes: QuoteRef[]) {
   const thread = useThread();
   return quotes.flatMap((q) => {
-    const comment = getComment(thread, q.id);
-    return comment && q.excerpt && isVerbatim(plainText(comment.html), q.excerpt) ? [{ ...q, excerpt: q.excerpt, comment }] : [];
+    const comment = q.excerpt ? quotedComment(thread, q.id, q.excerpt) : null;
+    return comment && q.excerpt ? [{ id: comment.id, excerpt: q.excerpt, comment }] : [];
   });
 }
 

@@ -14,6 +14,7 @@ import {
 import { type EditionEvent, writeEdition } from "./generate";
 import type { Story } from "./hn";
 import { getStore } from "./store";
+import { repairQuotes } from "./thread";
 import { editionView, writerView } from "./thread-view";
 import { getCommentTimeline } from "./tools";
 
@@ -85,7 +86,7 @@ async function write(story: Story, final: boolean, run: string): Promise<void> {
     const written = await writeEdition({ id: String(story.id), emit });
     await Promise.all(threadSaved);
     const writtenAt = Date.now();
-    const program = bareProgram(written.program);
+    const program = repairQuotes(bareProgram(written.program), written.thread);
     await saveEdition(story.id, {
       program,
       thread: editionView(written.thread, program),

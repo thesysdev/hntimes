@@ -31,6 +31,19 @@ export async function fetchArticle(url: string): Promise<Article | null> {
   return page && { url: page.url, title: page.title, text: page.text, image: page.image };
 }
 
+/** Site-wide images that say nothing about the story: logos, default share cards, favicons. */
+const GENERIC_IMAGE = /(og[-_]?image|default|logo|favicon|placeholder|share[-_]?card|social[-_]?card|brand)/i;
+
+/** Whether an article's preview image is a generic one (for lead art, which is off for now). */
+export function isGenericImage(src: string): boolean {
+  try {
+    const { pathname } = new URL(src);
+    return GENERIC_IMAGE.test(pathname.split("/").pop() ?? "") || pathname.split("/").length <= 2;
+  } catch {
+    return true;
+  }
+}
+
 // Images for the edition: each with a src the page can load, a credit and what it shows.
 // Off for now: editions are written without lead art. The real source will be OpenUI Cloud's
 // standalone image search endpoint (details pending).

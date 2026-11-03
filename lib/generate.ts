@@ -6,17 +6,16 @@ import { type EditionImage, fetchArticle, fetchHnThread } from "./agent-tools";
 import { cachedArticle } from "./cache";
 // Images are off for now (see the lead art note below).
 // import { searchImages } from "./agent-tools";
-// import { isGenericImage } from "./editor";
-import { type EditorNotes, likelyCast, planEdition } from "./editor";
-import { fetchEarlierStories, fetchProfiles } from "./hn";
+// import { isGenericImage } from "./agent-tools";
+import { fetchEarlierStories, fetchProfiles, likelyCast } from "./hn";
 import type { Thread } from "./thread";
 import { editionPrompt } from "./thread-prompt";
 
 // The edition agent. Given a story it gathers everything first: the thread, then in parallel the
-// article, earlier stories from the same site, and an editor's brief (angle, cast) with the cast's
-// profiles. (Lead art is off for now.) Then it makes one streamed call to OpenUI Cloud Gateway with
-// all of it in a single prompt. Gateway validates and corrects the OpenUI Lang against the catalog
-// while it streams.
+// article, earlier stories from the same site, and the HN profiles of the likely cast. (Lead art is
+// off for now.) Then it makes one streamed call to OpenUI Cloud Gateway with all of it in a single
+// prompt; the model plans the edition in its own reasoning before writing it. Gateway validates
+// and corrects the OpenUI Lang against the catalog while it streams.
 //
 // Progress goes out as events, one per step (see EditionEvent); /api/edition sends them as NDJSON.
 //
@@ -27,7 +26,6 @@ import { editionPrompt } from "./thread-prompt";
 export type EditionEvent =
   | { type: "status"; message: string }
   | { type: "story"; title: string; author: string; comments: number; site: string | null }
-  | { type: "brief"; shape: string; angle: string; headline: string; cast: string[] }
   | { type: "thread"; thread: Thread }
   | { type: "source"; name: string; ok: boolean; size: number; ms: number }
   | { type: "warning"; message: string }
@@ -40,7 +38,7 @@ export type Reasoning = (typeof REASONING)[number];
 /** The model editions are written with, and its reasoning effort. HACKERPAPER_MODEL and
  * HACKERPAPER_REASONING override them (for comparing models locally). */
 export const MODEL = process.env.HACKERPAPER_MODEL ?? "openai/gpt-6.1-sol";
-export const DEFAULT_REASONING = (process.env.HACKERPAPER_REASONING ?? "low") as Reasoning;
+export const DEFAULT_REASONING = (process.env.HACKERPAPER_REASONING ?? "medium") as Reasoning;
 
 // The spec file also carries prompt options; Cloud takes those separately, below.
 const { root, components, componentGroups, schema } = spec as LibrarySpec;
@@ -107,12 +105,10 @@ export async function writeEdition({
   emit({ type: "story", title, author, comments: commentCount, site });
   const storyUrl = thread.story.url;
 
-  // Then, in parallel: the article, earlier stories from the same site, and the editor's notes
-  // (followed by the cast's profiles).
-  emit({ type: "status", message: "Reading the article and briefing the editor…" });
-  // Profiles of the likely cast load while the editor reads, so only surprises wait for it.
-  const likelyProfiles = fetchProfiles(likelyCast(thread));
-  const [article, earlier, notes] = await Promise.all([
+  // Then, in parallel: the article, earlier stories from the same site, and the HN profiles of the
+  // people the story is likely told through. The writer plans the edition itself.
+  emit({ type: "status", message: "Reading the article and looking up who's talking…" });
+  const [article, earlier, people] = await Promise.all([
     storyUrl
       ? source(
           "fetch_article",
@@ -122,32 +118,13 @@ export async function writeEdition({
         )
       : null,
     source("earlier_stories", "Looking up earlier coverage…", optional("earlier_stories", () => fetchEarlierStories(thread.story)), (e) => e?.length ?? 0),
-    source("plan_edition", "Briefing the editor…", () => planEdition(thread), (n) => n.cast.length).then(
-      async (notes): Promise<EditorNotes> => {
-        log(`editor: ${JSON.stringify({ ...notes, cast: notes.cast.length, moments: notes.moments.length })}`);
-        emit({ type: "brief", shape: notes.shape, angle: notes.angle, headline: notes.headline, cast: notes.cast.map((p) => p.author) });
-        // Images are off for now; when they're back, the image search runs alongside the profiles:
-        // const query = notes.image.use === "search" ? notes.image.queries[0] : null;
-        // query ? source("search_images", `Searching for “${query}”…`, () => searchImages(query), (i) => i.length) : [],
-        thread.people = await source(
-          "fetch_profiles",
-          "Checking who the sources are…",
-          async () => {
-            const known = await likelyProfiles;
-            const missing = notes.cast.map((p) => p.author).filter((name) => !known[name]);
-            const all = { ...known, ...(missing.length ? await fetchProfiles([...new Set(missing)]) : {}) };
-            const cast = new Set([thread.story.author, ...notes.cast.map((p) => p.author)]);
-            return Object.fromEntries(Object.entries(all).filter(([name]) => cast.has(name)));
-          },
-          (p) => Object.keys(p).length,
-        );
-        return notes;
-      },
-    ),
+    source("fetch_profiles", "Looking up who's talking…", () => fetchProfiles(likelyCast(thread)), (p) => Object.keys(p).length),
   ]);
+  thread.people = people;
 
-  // Lead art is off for now: editions are written without images. When it's back, the article's
-  // own preview image beats a search result when it's a real one:
+  // Lead art is off for now: editions are written without images. When it's back, it needs image
+  // search queries (the old editor pass wrote them; see git history), and the article's own
+  // preview image beats a search result when it's a real one:
   // const articleImage = article?.image && !isGenericImage(article.image) ? article.image : null;
   // const images: EditionImage[] = articleImage
   //   ? [{ src: articleImage, credit: `Image from ${new URL(storyUrl!).hostname.replace(/^www\./, "")}`, shows: "The article's own preview image." }]
@@ -160,7 +137,7 @@ export async function writeEdition({
 
   // 2. One streamed call with all of it.
   emit({ type: "status", message: `Writing with ${label}…` });
-  const prompt = editionPrompt(thread, article, images, notes, earlier ?? []);
+  const prompt = editionPrompt(thread, article, images, earlier ?? []);
   log(`prompt: system ${systemPrompt.length} chars, sources ${prompt.length} chars`);
   const gateway = new OpenAI({ apiKey, baseURL: "https://api.thesys.dev/v1/embed" });
   const completion = await gateway.chat.completions.create(

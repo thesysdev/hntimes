@@ -173,6 +173,20 @@ export async function fetchEarlierStories(story: Thread["story"]): Promise<Earli
     .slice(0, 5);
 }
 
+/**
+ * The people a story is likely told through: the poster, and the authors of the comments that drew
+ * the most replies. Their HN profiles are looked up for the writer.
+ */
+export function likelyCast(thread: Thread, count = 15): string[] {
+  const byReplies = thread.order.map((id) => thread.comments[id]).sort((a, b) => b.replies - a.replies);
+  const names = new Set([thread.story.author]);
+  for (const c of byReplies) {
+    if (names.size >= count) break;
+    names.add(c.author);
+  }
+  return [...names];
+}
+
 export type Profile = { karma: number; about: string };
 
 /** How much of a profile's "about" the edition sees: enough for a job title or a project. */

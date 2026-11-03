@@ -678,7 +678,7 @@
         "facts"
       ],
       "additionalProperties": false,
-      "description": "Large figures that carry the story (\"By the numbers\"), 2 to 4 Facts. Only for stories with real numbers in the article or thread."
+      "description": "Large figures that carry the news (\"By the numbers\"), 2 to 4 Facts: real-world measurements, counts, prices or dates, each label clear on its own. Never details from inside a work of fiction."
     },
     "Fact": {
       "type": "object",
@@ -795,7 +795,7 @@
         "quotes"
       ],
       "additionalProperties": false,
-      "description": "Three or four short reactions from different readers, side by side (\"What readers said\"). Each Quote needs an excerpt of one sentence or less: the sharpest, funniest or most telling lines, not arguments."
+      "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
     },
     "Correction": {
       "type": "object",

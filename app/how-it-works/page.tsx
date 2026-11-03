@@ -12,13 +12,13 @@ export default function HowItWorks() {
         <p className={styles.kicker}>About the paper</p>
         <h1 className={styles.title}>How a Hacker News thread becomes a front page</h1>
         <p className={styles.dek}>
-          Swap news.ycombinator.com for this site in any story link, and an editor writes that discussion
-          up as a newspaper edition.
+          Swap news.ycombinator.com for this site in any story link, and that discussion is written up as
+          a newspaper edition.
         </p>
         <ol className={styles.steps}>
           <li>
-            <strong>Reporting.</strong> The agent reads the whole thread, the linked article and earlier HN
-            stories from the same site, and an editor picks the angle and the people to quote.
+            <strong>Reporting.</strong> The agent reads the whole thread, the linked article, earlier HN stories
+            from the same site and the profiles of the people doing the talking.
           </li>
           <li>
             <strong>Writing.</strong> A language model writes the edition in OpenUI Lang, a compact language

@@ -1,5 +1,4 @@
 import type { Article, EditionImage } from "./agent-tools";
-import type { EditorNotes } from "./editor";
 import type { EarlierStory } from "./hn";
 import { getComment, hoursAfterPost, plainText, type Thread } from "./thread";
 
@@ -92,24 +91,14 @@ export function formatThread(thread: Thread): string {
   return lines.join("\n");
 }
 
-/** The assignment editor's brief, as the writer reads it. */
-function formatNotes(notes: EditorNotes, poster: string, people: Thread["people"] = {}): string[] {
-  const profile = (name: string) => {
-    const p = people[name];
-    if (!p) return "";
-    return ` (HN karma ${p.karma.toLocaleString("en-US")}${p.about ? `; profile says: "${p.about}"` : ""})`;
-  };
-  return [
-    ...(poster ? [`Poster: ${poster}${profile(poster)}`] : []),
-    `Shape: ${notes.shape}`,
-    `Angle: ${notes.angle}`,
-    `Working headline: ${notes.headline}`,
-    ...(notes.hook ? [`What makes it worth reading: ${notes.hook}`] : []),
-    "Cast (quote the story through these people; [id] is one of their comments):",
-    ...(notes.cast.length ? notes.cast.map((p) => `- ${p.author} [${p.id}]: ${p.who}${profile(p.author)}`) : ["- None picked."]),
-    "Best lines (quote these):",
-    ...(notes.moments.length ? notes.moments.map((m) => `- [${m.id}] ${m.why}`) : ["- None picked."]),
-  ];
+/** The HN profiles of the poster and the most-replied commenters, as the writer reads them. */
+function formatPeople(thread: Thread): string[] {
+  const people = Object.entries(thread.people ?? {});
+  if (!people.length) return ["None found."];
+  return people.map(
+    ([name, p]) =>
+      `- ${name}${name === thread.story.author ? " (the poster)" : ""}: HN karma ${p.karma.toLocaleString("en-US")}${p.about ? `; profile says: "${p.about}"` : ""}`,
+  );
 }
 
 function formatEarlier(stories: EarlierStory[]): string[] {
@@ -125,13 +114,9 @@ export function editionPrompt(
   thread: Thread,
   article: Article | null,
   images: EditionImage[],
-  notes: EditorNotes,
   earlier: EarlierStory[],
 ): string {
   const prompt = [
-    "# Editor's notes",
-    ...formatNotes(notes, thread.story.author, thread.people),
-    "",
     formatThread(thread),
     "",
     "# Article",
@@ -142,6 +127,10 @@ export function editionPrompt(
     "# Images",
     "Each: src · credit · what it shows.",
     ...(images.length ? images.map((i) => `${i.src} · credit: ${i.credit} · shows: ${i.shows}`) : ["None."]),
+    "",
+    "# People",
+    "HN profiles of the poster and of the commenters whose comments drew the most replies.",
+    ...formatPeople(thread),
     "",
     "# Earlier on Hacker News from the same site",
     "Background only: you may mention these in Prose (year, title, how big the discussion was), but there are no comments from them to quote.",

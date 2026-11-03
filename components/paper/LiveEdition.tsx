@@ -17,7 +17,6 @@ type Status = "working" | "done" | "error";
 type EditionEvent =
   | { type: "status"; message: string }
   | { type: "story"; title: string; author: string; comments: number; site: string | null }
-  | { type: "brief"; shape: string; angle: string; headline: string; cast: string[] }
   | { type: "thread"; thread: Thread }
   | { type: "source"; name: string; ok: boolean; size: number; ms: number }
   | { type: "warning"; message: string }
@@ -34,7 +33,6 @@ const SOURCE_LABELS: Record<string, string> = {
   fetch_hn_thread: "thread",
   fetch_article: "article",
   earlier_stories: "earlier stories",
-  plan_edition: "editor",
   fetch_profiles: "profiles",
   search_images: "images",
 };
@@ -140,10 +138,6 @@ export function LiveEdition({
             } else if (e.type === "story") {
               const { title, author, comments, site } = e;
               setDesk((d) => ({ ...d, story: { title, author, comments, site } }));
-            } else if (e.type === "brief") {
-              const { shape, angle, headline, cast } = e;
-              const sources = cast.length ? `, through ${cast.slice(0, 3).join(", ")}${cast.length > 3 ? " and others" : ""}` : "";
-              setDesk((d) => ({ ...d, brief: { shape, angle, headline, cast }, done: [...d.done, `Assigned as a ${shape}${sources}`] }));
             } else if (e.type === "thread") setThread(e.thread);
             else if (e.type === "source") {
               setSources((s) => [

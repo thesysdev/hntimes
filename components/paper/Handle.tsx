@@ -43,21 +43,22 @@ export function Handle({ name, id }: { name: string; id?: number | null }) {
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * Links usernames in a stretch of text: any commenter written as @name (the model marks every
- * handle that way), and the quoted people's names even without the @. The @ itself isn't printed.
+ * Links usernames in a stretch of text: anything written as @name (the model marks every handle
+ * that way), and the quoted people's names even without the @. The @ itself isn't printed. Any
+ * @name is linked, not only people in the page's copy of the thread: the page holds just the
+ * comments the edition quotes, and the checker confirms server-side that every @name is real.
  */
 export function LinkNames({ text }: { text: string }) {
   const thread = useThread();
   const sources = useSources();
   const pattern = useMemo(() => {
-    const everyone = new Set([thread.story.author, ...Object.values(thread.comments).map((c) => c.author)]);
     const byLength = (names: Iterable<string>) => [...names].filter(Boolean).sort((a, b) => b.length - a.length).map(escape);
-    // @name for anyone in the thread; a bare name only for sources, and only as a whole word.
+    // @name in HN's username alphabet (not inside an address); a bare name only for sources, as a whole word.
     return new RegExp(
-      `@(${byLength(everyone).join("|")})(?![\\w-])|(?<![\\w@/.-])(${byLength(sources.keys()).join("|") || "(?!)"})(?![\\w@/-])`,
+      `(?<![\\w.])@([A-Za-z0-9_-]{2,15})(?![\\w-])|(?<![\\w@/.-])(${byLength(sources.keys()).join("|") || "(?!)"})(?![\\w@/-])`,
       "g",
     );
-  }, [thread, sources]);
+  }, [sources]);
 
   const parts: React.ReactNode[] = [];
   let cursor = 0;
