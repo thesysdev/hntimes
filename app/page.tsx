@@ -1,10 +1,17 @@
+import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FrontPage, FrontPageSkeleton, LeadConversation, Masthead, PaperFrame } from "@/components/paper";
 import { cachedFor, coverable, FRONT_PAGE_TTL, keys } from "@/lib/cache";
 import { fetchFrontPage, fetchThread } from "@/lib/hn";
 import { plainText } from "@/lib/thread";
+import { SITE } from "@/lib/site";
 import { getCommentTimeline } from "@/lib/tools";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: SITE.name, url: "/", title: SITE.name, description: SITE.description },
+};
 
 /** The front page: HN's current stories, each opening its edition at /item?id=…, as on HN. */
 export default function Home() {

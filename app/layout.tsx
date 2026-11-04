@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Libre_Franklin, Newsreader, Germania_One } from "next/font/google";
 import Script from "next/script";
+import { SITE } from "@/lib/site";
 import { themeScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -27,9 +28,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Defaults for every page; each page sets its own canonical address (a canonical here would be
+// inherited by all of them).
 export const metadata: Metadata = {
-  title: "The HN Times",
-  description: "HN discussion, if it had an editor.",
+  metadataBase: new URL(SITE.url),
+  title: { default: `${SITE.name}: ${SITE.tagline}`, template: `%s · ${SITE.name}` },
+  description: SITE.description,
+  applicationName: SITE.name,
+  openGraph: { type: "website", siteName: SITE.name, locale: "en_US" },
+  twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#121212" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

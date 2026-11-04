@@ -3,7 +3,14 @@ import { Masthead, PaperFrame } from "@/components/paper";
 import { BUILDING_UNTIL, DEVELOPING_TTL, FROZEN_AFTER, MIN_COMMENTS, MIN_POINTS_DEVELOPING, MIN_POINTS_SETTLED } from "@/lib/cache";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = { title: "About · The HN Times" };
+export const metadata: Metadata = {
+  title: "About",
+  description: "What The HN Times is, how to read an edition, how one is made, and what gets covered.",
+  alternates: { canonical: "/about" },
+  // Setting openGraph here drops the inherited share image, so it's named again.
+  openGraph: { type: "website", siteName: "The HN Times", url: "/about", title: "About The HN Times", images: "/opengraph-image" },
+  twitter: { card: "summary_large_image", images: "/opengraph-image" },
+};
 
 const hours = (seconds: number) => seconds / 3600;
 
