@@ -12,6 +12,8 @@ export const story = cache(async (id: number) => fetchStory(id).catch(() => null
 
 export type Cover = {
   story: Story | null;
+  /** Whether the cover is the stored edition's own headline, not the HN title standing in for it. */
+  fromEdition: boolean;
   kicker: string | null;
   title: string;
   dek: string | null;
@@ -35,7 +37,7 @@ export const cover = cache(async (id: number): Promise<Cover | null> => {
   const [found, record] = await Promise.all([story(id), caching ? editionRecord(id) : null]);
   const doc = record && (await edition(record));
   const headline = doc && headlineOf(doc.program);
-  if (headline) return { story: found, ...headline };
+  if (headline) return { story: found, fromEdition: true, ...headline };
   if (!found) return null;
-  return { story: found, kicker: null, title: found.title, dek: null };
+  return { story: found, fromEdition: false, kicker: null, title: found.title, dek: null };
 });
