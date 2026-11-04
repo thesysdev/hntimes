@@ -13,7 +13,7 @@ export function Masthead({ edition }: Props) {
   return (
     <header className={styles.masthead}>
       <Link href="/" className={styles.wordmark}>
-        Hackerpaper
+        The HN Times
       </Link>
       <div className={styles.folio}>
         <span className={styles.date}>

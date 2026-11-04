@@ -5,7 +5,7 @@ import type { Thread } from "./thread";
 import { getCommentTimeline, type ThreadShapeComment } from "./tools";
 import { CACHE_VERSION } from "./version";
 
-// What Hackerpaper caches, and for how long. Development never caches: every page is fetched and
+// What The HN Times caches, and for how long. Development never caches: every page is fetched and
 // every edition written afresh.
 //
 // - The front page: 15 minutes.

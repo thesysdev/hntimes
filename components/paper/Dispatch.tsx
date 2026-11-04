@@ -72,8 +72,8 @@ export function TooQuiet({ title, settled }: { title: string; settled: boolean }
       </h1>
       <p className={styles.dek}>
         {settled
-          ? "Hackerpaper covers stories that reached 100 points and drew a discussion. This one didn’t."
-          : "Hackerpaper writes up stories once readers start talking. This one isn’t there yet: come back as it develops."}
+          ? "The HN Times covers stories that reached 100 points and drew a discussion. This one didn’t."
+          : "The HN Times writes up stories once readers start talking. This one isn’t there yet: come back as it develops."}
       </p>
     </section>
   );

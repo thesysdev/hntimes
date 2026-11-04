@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Libre_Franklin, Newsreader, UnifrakturMaguntia } from "next/font/google";
+import { Geist_Mono, Libre_Franklin, Newsreader, Germania_One } from "next/font/google";
 import Script from "next/script";
 import { themeScript } from "@/lib/theme";
 import "./globals.css";
@@ -16,8 +16,8 @@ const franklin = Libre_Franklin({
   subsets: ["latin"],
 });
 
-const unifraktur = UnifrakturMaguntia({
-  variable: "--font-unifraktur",
+const germania = Germania_One({
+  variable: "--font-germania",
   subsets: ["latin"],
   weight: "400",
 });
@@ -28,7 +28,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hackerpaper",
+  title: "The HN Times",
   description: "HN discussion, if it had an editor.",
 };
 
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // The theme script sets data-theme before hydration, so the attribute can differ from the server's.
     <html
       lang="en"
-      className={`${newsreader.variable} ${franklin.variable} ${unifraktur.variable} ${geistMono.variable}`}
+      className={`${newsreader.variable} ${franklin.variable} ${germania.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body>

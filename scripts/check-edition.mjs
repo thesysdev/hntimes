@@ -1,4 +1,4 @@
-// Checks an OpenUI Lang edition: it must parse against the Hackerpaper catalog, include the thread
+// Checks an OpenUI Lang edition: it must parse against the HN Times catalog, include the thread
 // map, and every quote must come from the thread (known comment id, verbatim excerpt).
 // Regenerate the schema first: npx @openuidev/cli generate components/paper/library.tsx --json-schema --out generated/schema.json
 // Usage: node scripts/check-edition.mjs runs/<file>.oui

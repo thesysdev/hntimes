@@ -3,11 +3,11 @@ import { Masthead, PaperFrame } from "@/components/paper";
 import { BUILDING_UNTIL, DEVELOPING_TTL, FROZEN_AFTER, MIN_COMMENTS, MIN_POINTS_DEVELOPING, MIN_POINTS_SETTLED } from "@/lib/cache";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = { title: "About · Hackerpaper" };
+export const metadata: Metadata = { title: "About · The HN Times" };
 
 const hours = (seconds: number) => seconds / 3600;
 
-/** What Hackerpaper is, how to read an edition, and how one is made. */
+/** What The HN Times is, how to read an edition, and how one is made. */
 export default function About() {
   return (
     <PaperFrame masthead={<Masthead />}>
@@ -17,7 +17,7 @@ export default function About() {
         <p className={styles.dek}>
           Every story on Hacker News comes with a thread, and the thread is often the better story: the
           engineer who corrects the article, the argument that changes course, the question nobody can
-          answer. Hackerpaper reads those threads and reports them the way a newspaper would.
+          answer. The HN Times reads those threads and reports them the way a newspaper would.
         </p>
 
         <section className={styles.section}>

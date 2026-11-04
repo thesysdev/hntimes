@@ -1,7 +1,7 @@
 @import "tailwindcss/preflight.css" layer(base);
 
 /*
- * Hackerpaper design tokens.
+ * The HN Times design tokens.
  * Paper and ink, one accent, and three voices: thread (accent), article (ink), added context (note).
  * Colors are light-dark() pairs: the system setting picks one, unless the reader chose a theme
  * (data-theme on <html>, set by ThemeToggle).
@@ -26,7 +26,7 @@
   --note: light-dark(#4f6470, #9db3be); /* added context */
   --note-wash: light-dark(#e6eaec, #252b2e);
 
-  --font-display: var(--font-unifraktur), "Old English Text MT", serif; /* nameplate only */
+  --font-display: var(--font-germania), "Old English Text MT", serif; /* nameplate only */
   --font-text: var(--font-newsreader), Georgia, "Times New Roman", serif;
   --font-ui: var(--font-franklin), "Franklin Gothic", "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;

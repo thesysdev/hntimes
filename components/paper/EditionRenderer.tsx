@@ -32,7 +32,7 @@ function quotedIds(node: unknown, ids = new Set<number>()): Set<number> {
   return ids;
 }
 
-/** Renders an OpenUI Lang edition with the Hackerpaper catalog and its tools. */
+/** Renders an OpenUI Lang edition with the HN Times catalog and its tools. */
 export function EditionRenderer({
   program,
   isStreaming = false,
@@ -57,7 +57,7 @@ export function EditionRenderer({
           setQuoted((previous) => (previous.size === ids.size ? previous : ids));
         }}
         onError={(errors) => {
-          if (errors.length > 0) console.error("[hackerpaper] edition errors", JSON.stringify(errors, null, 2));
+          if (errors.length > 0) console.error("[hntimes] edition errors", JSON.stringify(errors, null, 2));
           onErrors?.(errors);
         }}
       />

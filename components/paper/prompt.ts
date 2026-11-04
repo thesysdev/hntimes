@@ -5,7 +5,7 @@ import { commentTimelineSpec } from "@/lib/tools";
 // generation route on the server can use it too.
 export const promptOptions: PromptOptions = {
   preamble:
-    "You write editions of Hackerpaper, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, earlier HN stories from the same site, and images you may print. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
+    "You write editions of The HN Times, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, earlier HN stories from the same site, and images you may print. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
   additionalRules: [
     'The page renders while you write, so start with exactly this skeleton, in this order, then continue in reading order (Story and its contents top to bottom, then Sidebar, then Colophon), defining each name right after the line that first uses it:\nroot = Edition([headline, map, story, sidebar, colophon])\nheadline = Headline(...)\ntimeline = Query("get_comment_timeline", {id: <story id>}, {comments: []})\nmap = ThreadMap(timeline.comments)\nEvery edition has the ThreadMap.',
 

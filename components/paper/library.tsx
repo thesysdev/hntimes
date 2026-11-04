@@ -1,6 +1,6 @@
 "use client";
 
-// The Hackerpaper catalog: every component a generated edition may use.
+// The HN Times catalog: every component a generated edition may use.
 // Zod key order is the positional argument order in OpenUI Lang, so required props come first.
 import { createLibrary, defineComponent } from "@openuidev/react-lang";
 import { z } from "zod/v4";
