@@ -17,9 +17,12 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  // HN serves its front page at /news too; so do we.
+  // HN serves its front page at /news too; so do we. /how-it-works was the about page's old address.
   async redirects() {
-    return [{ source: "/news", destination: "/", permanent: false }];
+    return [
+      { source: "/news", destination: "/", permanent: false },
+      { source: "/how-it-works", destination: "/about", permanent: true },
+    ];
   },
 };
 

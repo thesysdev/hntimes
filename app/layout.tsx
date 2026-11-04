@@ -29,7 +29,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Hackerpaper",
-  description: "Hacker News, if it had an editor.",
+  description: "HN discussion, if it had an editor.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

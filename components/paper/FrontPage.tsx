@@ -168,7 +168,7 @@ export function FrontPage({ stories, lead: conversation }: { stories: FrontPageS
           <a href="https://www.openui.com" className={styles.openui}>
             OpenUI
           </a>
-          . Here&rsquo;s <Link href="/how-it-works">how it works</Link>.
+          . Here&rsquo;s <Link href="/about">how it works</Link>.
         </p>
       </footer>
     </section>

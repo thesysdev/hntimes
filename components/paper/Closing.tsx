@@ -91,7 +91,7 @@ export function Colophon() {
           OpenUI
         </a>
         . Quotes are verbatim and link to their source on Hacker News; notes marked ◆ are added context.
-        Here&rsquo;s <a href="/how-it-works">how it works</a>.
+        Here&rsquo;s <a href="/about">how it works</a>.
       </p>
     </footer>
   );

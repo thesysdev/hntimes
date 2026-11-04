@@ -27,21 +27,13 @@
   line-height: 1.4;
   color: var(--ink-2);
   text-wrap: pretty;
-  margin-bottom: var(--space-6);
 }
 
 .steps {
   display: grid;
-  gap: var(--space-4);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--rule);
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
-.steps strong {
-  font-family: var(--font-ui);
-  font-size: 0.86em;
+  gap: var(--space-3);
+  padding-left: 1.2em;
+  list-style: decimal;
 }
 
 .cta {
@@ -52,4 +44,47 @@
 .cta a {
   font-weight: 700;
   color: var(--accent-ink);
+}
+
+.section {
+  padding-top: var(--space-5);
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--rule);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.section h2 {
+  font-size: var(--step-1);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-3);
+}
+
+.section p + p,
+.section dl + p {
+  margin-top: var(--space-3);
+}
+
+.parts {
+  display: grid;
+  gap: var(--space-1) 0;
+}
+
+.parts dt,
+.steps strong {
+  font-family: var(--font-ui);
+  font-size: 0.86em;
+  font-weight: 700;
+}
+
+.parts dt:not(:first-child) {
+  margin-top: var(--space-2);
+}
+
+.rules {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: 1.2em;
+  list-style: disc;
 }
