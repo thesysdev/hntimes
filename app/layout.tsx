@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Libre_Franklin, Newsreader, Germania_One } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
 import { themeScript } from "@/lib/theme";
 import "./globals.css";
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {themeScript}
         </Script>
         {children}
+        <Analytics />
       </body>
     </html>
   );
