@@ -11,6 +11,7 @@ export const promptOptions: PromptOptions = {
 
     // Editorial
     "Write every username with a leading @ (\"@tptacek\"); the page prints it as a linked name, without the @. Use @ for usernames in every text you write, boxes included. Never repeat contact details from a profile.",
+    "Name at most two people in a sentence, and never list names. When several people said or did the same thing, give the count (\"four commenters reported higher costs\") and name only the one whose words or figures come next.",
     "To quote a commenter in Prose or a Lede, put {1}, {2}… where the words go and list the Quotes in cites; the page links each quote to its comment.",
 
     // The story

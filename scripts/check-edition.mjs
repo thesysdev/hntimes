@@ -70,6 +70,11 @@ for (const el of elements.filter((e) => e.typeName === "Prose" || e.typeName ===
     for (const [, name] of node.matchAll(/@([\w-]+)/g)) counts[name] = (counts[name] ?? 0) + 1;
     for (const [name, n] of Object.entries(counts))
       if (n >= 3) problems.push({ code: "repeated-handle", message: `@${name} ${n} times in: "${node.slice(0, 120)}…"` });
+    // A sentence naming three or more people reads as a roll call; the prompt asks for a count instead.
+    for (const sentence of node.split(/(?<=[.!?])\s+/)) {
+      const names = new Set([...sentence.matchAll(/@([\w-]+)/g)].map(([, name]) => name));
+      if (names.size >= 3) problems.push({ code: "crowded-sentence", message: `${names.size} names in: "${sentence.slice(0, 140)}…"` });
+    }
     return;
   }
   if (node && typeof node === "object") Object.values(node).forEach(walk);

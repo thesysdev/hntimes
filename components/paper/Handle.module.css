@@ -1,10 +1,8 @@
-/* A username in running text: the sans at a touch under text size, like a newspaper's agate credit. */
+/* A username in running text: set in the surrounding type, so names read as part of the sentence;
+   only the underline marks them as links. */
 .handle {
-  font-family: var(--font-ui);
-  font-size: 0.86em;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--ink);
+  font: inherit;
+  color: inherit;
   text-decoration: underline;
   text-decoration-color: var(--rule);
   text-decoration-thickness: 1px;
