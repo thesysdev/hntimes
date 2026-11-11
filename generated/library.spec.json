@@ -7,11 +7,11 @@
     },
     "Headline": {
       "signature": "Headline(kicker: string, title: string, dek: string)",
-      "description": "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek)."
+      "description": "The banner: the beat in one or two words (kicker), an editor's headline that says plainly what happened (title), and one sentence on what the link is and how readers took it (dek)."
     },
     "ThreadMap": {
-      "signature": "ThreadMap(comments: {id: number, parent: number, depth: number, hours: number}[], quoted?: number[])",
-      "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional."
+      "signature": "ThreadMap(comments: {id: number, parent: number, depth: number, hours: number}[])",
+      "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. The page marks the comments the edition quotes."
     },
     "Story": {
       "signature": "Story(blocks: (LeadArt | Lede | Section | PullQuote | FactBox | Positions | VoxPop | Correction)[])",
@@ -38,8 +38,8 @@
       "description": "A paragraph in the editor's voice: report and paraphrase, the way a newspaper does. Plain text, no markdown. To quote a commenter, write {1}, {2}… where their words go and list the Quotes in cites (each excerpt a short phrase or sentence); the page prints the excerpt in quotation marks with the commenter's name. Never type quoted words or quotation marks around someone's words yourself. Terms are marked inline and defined after the paragraph."
     },
     "PullQuote": {
-      "signature": "PullQuote(id: number, excerpt?: string)",
-      "description": "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate."
+      "signature": "PullQuote(commentId: number, excerpt: string)",
+      "description": "A large display quote: one line from a comment, copied exactly from it (excerpt). Use sparingly, at most one per edition, for a line that sums up a whole debate."
     },
     "Exchange": {
       "signature": "Exchange(quotes: Quote[])",
@@ -47,15 +47,15 @@
     },
     "Positions": {
       "signature": "Positions(question: string, sides: Side[])",
-      "description": "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner."
+      "description": "Where the thread splits, as 2 or 3 sides in one row, each with the comments behind it. A bar shows how many of the cited comments back each side, so cite in proportion to each side's support. Never declares a winner."
     },
     "LeadArt": {
       "signature": "LeadArt(src: string, caption: string, credit: string)",
       "description": "An image printed in black and white, like a newspaper photo. Use the image you are given; never invent a src. caption says what it shows in one sentence; credit names the source (e.g. \"Screenshot of example.com\")."
     },
     "ArticleSummary": {
-      "signature": "ArticleSummary(title: string, points: string[])",
-      "description": "What the linked article says, as short points, kept visibly apart from what commenters said."
+      "signature": "ArticleSummary(title: string, items: string[])",
+      "description": "What the linked article says, as short points, kept visibly apart from what commenters said. The page labels it \"From the article\" with the site's name; title says whose account it is (\"What the post says\")."
     },
     "ArticleQuote": {
       "signature": "ArticleQuote(text: string)",
@@ -63,7 +63,7 @@
     },
     "KeyPoints": {
       "signature": "KeyPoints(title: string, items: string[])",
-      "description": "A numbered summary box: 3 to 5 one-sentence takeaways."
+      "description": "A numbered summary box (\"At a glance\"): 3 to 5 one-sentence takeaways."
     },
     "OpenQuestions": {
       "signature": "OpenQuestions(items: Question[])",
@@ -79,23 +79,23 @@
     },
     "Timeline": {
       "signature": "Timeline(title: string, events: Event[])",
-      "description": "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time."
+      "description": "A chronology (\"How it unfolded\"), 3 to 7 Events, for incidents, histories and projects that changed over time."
     },
     "Cast": {
       "signature": "Cast(title: string, people: Person[])",
       "description": "The people the story is told through (\"Who's talking\"), 3 to 6 People, as named in the story."
     },
     "VoxPop": {
-      "signature": "VoxPop(title: string, quotes: Quote[])",
-      "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
+      "signature": "VoxPop(question: string, quotes: Quote[])",
+      "description": "Readers answering one question in their own words, side by side (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
     },
     "Correction": {
       "signature": "Correction(claim: string, quote: Quote)",
       "description": "\"For the record\": a statement of fact that turned out wrong, from the article or a commenter, in your words and without saying who corrected it (claim), and the correcting comment with its key sentence as excerpt (quote). Only when the thread really corrects a fact, not for disagreements."
     },
     "Quote": {
-      "signature": "Quote(id: number, excerpt?: string)",
-      "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
+      "signature": "Quote(commentId: number, excerpt?: string)",
+      "description": "A comment from the thread, by its id, and the words quoted from it. excerpt must be copied character for character from that comment. Only a Quote in an Exchange may leave it out, to print the whole comment."
     },
     "Term": {
       "signature": "Term(term: string, definition: string)",
@@ -106,28 +106,28 @@
       "description": "One side of a disagreement: a short label, a one-sentence summary, and the comments that argue it."
     },
     "Question": {
-      "signature": "Question(question: string, id: number)",
-      "description": "A question the thread left unsettled, and the id of the comment that raised it."
+      "signature": "Question(question: string, commentId: number)",
+      "description": "A question the thread left unsettled, and the comment that raised it. The page credits that commenter, so the question doesn't name them."
     },
     "Resource": {
-      "signature": "Resource(name: string, note: string, url?: string, ids?: number[])",
-      "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
+      "signature": "Resource(name: string, note: string, url?: string, commentIds?: number[])",
+      "description": "Something worth following up. url must be a link that appears in the thread; the page credits the commenters who posted it. For things named without a link, pass \"\" as url and give commentIds, the comments that mention it. With a url, commentIds is ignored."
     },
     "ResourceGroup": {
       "signature": "ResourceGroup(title: string, items: Resource[])",
       "description": "A titled group of resources."
     },
     "Fact": {
-      "signature": "Fact(value: string, label: string, id?: number)",
-      "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give the comment id when it comes from the thread."
+      "signature": "Fact(value: string, label: string, commentId?: number)",
+      "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give commentId when it comes from a comment, and the page credits the commenter."
     },
     "Event": {
-      "signature": "Event(when: string, what: string, id?: number)",
-      "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give the comment id when the thread is the source."
+      "signature": "Event(when: string, what: string, commentId?: number)",
+      "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give commentId when a comment is the source, and the page credits the commenter."
     },
     "Person": {
-      "signature": "Person(id: number, who: string)",
-      "description": "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves."
+      "signature": "Person(commentId: number, about: string)",
+      "description": "A commenter, identified by one of their comments: the page prints their username and links to that comment. about says who they are in a short phrase, from what they say about themselves."
     }
   },
   "componentGroups": [
@@ -382,7 +382,7 @@
           "dek"
         ],
         "additionalProperties": false,
-        "description": "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek)."
+        "description": "The banner: the beat in one or two words (kicker), an editor's headline that says plainly what happened (title), and one sentence on what the link is and how readers took it (dek)."
       },
       "ThreadMap": {
         "type": "object",
@@ -413,19 +413,13 @@
               ],
               "additionalProperties": false
             }
-          },
-          "quoted": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
           }
         },
         "required": [
           "comments"
         ],
         "additionalProperties": false,
-        "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional."
+        "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. The page marks the comments the edition quotes."
       },
       "Story": {
         "type": "object",
@@ -511,7 +505,7 @@
       "Quote": {
         "type": "object",
         "properties": {
-          "id": {
+          "commentId": {
             "type": "number"
           },
           "excerpt": {
@@ -519,10 +513,10 @@
           }
         },
         "required": [
-          "id"
+          "commentId"
         ],
         "additionalProperties": false,
-        "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
+        "description": "A comment from the thread, by its id, and the words quoted from it. excerpt must be copied character for character from that comment. Only a Quote in an Exchange may leave it out, to print the whole comment."
       },
       "Section": {
         "type": "object",
@@ -635,7 +629,7 @@
       "PullQuote": {
         "type": "object",
         "properties": {
-          "id": {
+          "commentId": {
             "type": "number"
           },
           "excerpt": {
@@ -643,10 +637,11 @@
           }
         },
         "required": [
-          "id"
+          "commentId",
+          "excerpt"
         ],
         "additionalProperties": false,
-        "description": "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate."
+        "description": "A large display quote: one line from a comment, copied exactly from it (excerpt). Use sparingly, at most one per edition, for a line that sums up a whole debate."
       },
       "Exchange": {
         "type": "object",
@@ -682,7 +677,7 @@
           "sides"
         ],
         "additionalProperties": false,
-        "description": "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner."
+        "description": "Where the thread splits, as 2 or 3 sides in one row, each with the comments behind it. A bar shows how many of the cited comments back each side, so cite in proportion to each side's support. Never declares a winner."
       },
       "Side": {
         "type": "object",
@@ -714,7 +709,7 @@
           "title": {
             "type": "string"
           },
-          "points": {
+          "items": {
             "type": "array",
             "items": {
               "type": "string"
@@ -723,10 +718,10 @@
         },
         "required": [
           "title",
-          "points"
+          "items"
         ],
         "additionalProperties": false,
-        "description": "What the linked article says, as short points, kept visibly apart from what commenters said."
+        "description": "What the linked article says, as short points, kept visibly apart from what commenters said. The page labels it \"From the article\" with the site's name; title says whose account it is (\"What the post says\")."
       },
       "ArticleQuote": {
         "type": "object",
@@ -759,7 +754,7 @@
           "items"
         ],
         "additionalProperties": false,
-        "description": "A numbered summary box: 3 to 5 one-sentence takeaways."
+        "description": "A numbered summary box (\"At a glance\"): 3 to 5 one-sentence takeaways."
       },
       "OpenQuestions": {
         "type": "object",
@@ -783,16 +778,16 @@
           "question": {
             "type": "string"
           },
-          "id": {
+          "commentId": {
             "type": "number"
           }
         },
         "required": [
           "question",
-          "id"
+          "commentId"
         ],
         "additionalProperties": false,
-        "description": "A question the thread left unsettled, and the id of the comment that raised it."
+        "description": "A question the thread left unsettled, and the comment that raised it. The page credits that commenter, so the question doesn't name them."
       },
       "ReadingList": {
         "type": "object",
@@ -842,7 +837,7 @@
           "url": {
             "type": "string"
           },
-          "ids": {
+          "commentIds": {
             "type": "array",
             "items": {
               "type": "number"
@@ -854,7 +849,7 @@
           "note"
         ],
         "additionalProperties": false,
-        "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
+        "description": "Something worth following up. url must be a link that appears in the thread; the page credits the commenters who posted it. For things named without a link, pass \"\" as url and give commentIds, the comments that mention it. With a url, commentIds is ignored."
       },
       "FactBox": {
         "type": "object",
@@ -885,7 +880,7 @@
           "label": {
             "type": "string"
           },
-          "id": {
+          "commentId": {
             "type": "number"
           }
         },
@@ -894,7 +889,7 @@
           "label"
         ],
         "additionalProperties": false,
-        "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give the comment id when it comes from the thread."
+        "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give commentId when it comes from a comment, and the page credits the commenter."
       },
       "Timeline": {
         "type": "object",
@@ -914,7 +909,7 @@
           "events"
         ],
         "additionalProperties": false,
-        "description": "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time."
+        "description": "A chronology (\"How it unfolded\"), 3 to 7 Events, for incidents, histories and projects that changed over time."
       },
       "Event": {
         "type": "object",
@@ -925,7 +920,7 @@
           "what": {
             "type": "string"
           },
-          "id": {
+          "commentId": {
             "type": "number"
           }
         },
@@ -934,7 +929,7 @@
           "what"
         ],
         "additionalProperties": false,
-        "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give the comment id when the thread is the source."
+        "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give commentId when a comment is the source, and the page credits the commenter."
       },
       "Cast": {
         "type": "object",
@@ -959,24 +954,24 @@
       "Person": {
         "type": "object",
         "properties": {
-          "id": {
+          "commentId": {
             "type": "number"
           },
-          "who": {
+          "about": {
             "type": "string"
           }
         },
         "required": [
-          "id",
-          "who"
+          "commentId",
+          "about"
         ],
         "additionalProperties": false,
-        "description": "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves."
+        "description": "A commenter, identified by one of their comments: the page prints their username and links to that comment. about says who they are in a short phrase, from what they say about themselves."
       },
       "VoxPop": {
         "type": "object",
         "properties": {
-          "title": {
+          "question": {
             "type": "string"
           },
           "quotes": {
@@ -987,11 +982,11 @@
           }
         },
         "required": [
-          "title",
+          "question",
           "quotes"
         ],
         "additionalProperties": false,
-        "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
+        "description": "Readers answering one question in their own words, side by side (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
       },
       "Correction": {
         "type": "object",
@@ -1054,7 +1049,7 @@
     }
   },
   "promptOptions": {
-    "preamble": "You write editions of The HN Times, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, earlier HN stories from the same site, and images you may print. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
+    "preamble": "You write editions of The HN Times, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, and earlier HN stories from the same site. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
     "additionalRules": [
       "The page renders while you write, so start with exactly this skeleton, in this order, then continue in reading order (Story and its contents top to bottom, then Sidebar, then Colophon), defining each name right after the line that first uses it:\nroot = Edition([headline, map, story, sidebar, colophon])\nheadline = Headline(...)\ntimeline = Query(\"get_comment_timeline\", {id: <story id>}, {comments: []})\nmap = ThreadMap(timeline.comments)\nEvery edition has the ThreadMap.",
       "Write every username with a leading @ (\"@tptacek\"); the page prints it as a linked name, without the @. Use @ for usernames in every text you write, boxes included. Never repeat contact details from a profile.",
@@ -1073,58 +1068,12 @@
       "Boxes follow the material, not a template: a Timeline for timed events; Positions only for a real split (two or three sides, each backed by at least two people), otherwise tell the disagreement in Prose; a FactBox only for real-world figures that carry the news (measurements, counts, prices, dates of actual events), each label understandable on its own; never for details inside a story's plot or trivia; a VoxPop for short lines worth hearing; a Correction when a reader corrects a fact. Breakouts (a PullQuote, FactBox, Positions, VoxPop or Correction placed between Sections in the Story) span the whole story: up to two, only when the material earns them, never two in a row, at most one PullQuote. A box that a reader can't understand without having read the link is worse than none.",
       "The Sidebar runs beside the Story, so fill it to about the same length: three to five blocks (KeyPoints on the link itself or a Cast first, then boxes such as a FactBox, Timeline or Correction, then OpenQuestions and a ReadingList in Sections).",
       "If Earlier on Hacker News lists stories, use the most relevant one or two as history in Prose: the year, what the story was, and how large the discussion was.",
-      "Never write words for a commenter. Quote people only through cites, PullQuote, Exchange, Positions, VoxPop or Correction, by comment id; every excerpt must be copied exactly from that comment. Every Quote outside an Exchange carries an excerpt of one or two sentences.",
+      "Never write words for a commenter. Quote people only through cites, PullQuote, Exchange, Positions, VoxPop or Correction, by comment id; every excerpt must be copied exactly from that comment. Every Quote outside an Exchange carries an excerpt, two sentences at most.",
       "Only use comment ids and link urls that appear in the thread. Only state facts found in the thread, the article or the earlier stories list. FactBox figures must appear in the article or a comment.",
       "Anything that is not from these sources (definitions, background) goes in a Term.",
       "Be fair: give each side of a disagreement its strongest form, and don't declare a winner on a question of fact or judgment.",
       "get_comment_timeline is the only tool. Never write thread data by hand; the ThreadMap marks quoted comments on its own.",
       "This edition has no images: never use LeadArt."
-    ],
-    "tools": [
-      {
-        "name": "get_comment_timeline",
-        "description": "The shape of an HN thread: every comment's id, the id it replies to, its reply depth (0 = top level), and hours since the post.",
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number",
-              "description": "The HN story id"
-            }
-          },
-          "required": [
-            "id"
-          ]
-        },
-        "outputSchema": {
-          "type": "object",
-          "properties": {
-            "comments": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "number"
-                  },
-                  "parent": {
-                    "type": "number"
-                  },
-                  "depth": {
-                    "type": "number"
-                  },
-                  "hours": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    ],
-    "toolCalls": true,
-    "bindings": false,
-    "builtinFunctions": false
+    ]
   }
 }

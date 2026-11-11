@@ -1,4 +1,5 @@
 import { isVerbatim } from "@/lib/thread";
+import { LinkNames } from "./Handle";
 import { useThread } from "./ThreadContext";
 import styles from "./Article.module.css";
 
@@ -17,7 +18,7 @@ function articleLink(url: string): { href: string; host: string } | null {
 }
 
 /** What the linked source says, kept visibly separate from what commenters said. */
-export function ArticleSummary({ title, points }: { title: string; points: React.ReactNode[] }) {
+export function ArticleSummary({ title, items }: { title: string; items: string[] }) {
   const { article } = useThread();
   if (!article) return null;
   const link = articleLink(article.url);
@@ -26,10 +27,14 @@ export function ArticleSummary({ title, points }: { title: string; points: React
       <p className={styles.label}>
         ¶ From the article{link && <> · <a href={link.href}>{link.host}</a></>}
       </p>
-      <h3 className={styles.title}>{title}</h3>
+      <h3 className={styles.title}>
+        <LinkNames text={title} />
+      </h3>
       <ul>
-        {points.map((p, i) => (
-          <li key={i}>{p}</li>
+        {items.map((item, i) => (
+          <li key={i}>
+            <LinkNames text={item} />
+          </li>
         ))}
       </ul>
     </aside>

@@ -186,7 +186,7 @@
         "dek"
       ],
       "additionalProperties": false,
-      "description": "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek)."
+      "description": "The banner: the beat in one or two words (kicker), an editor's headline that says plainly what happened (title), and one sentence on what the link is and how readers took it (dek)."
     },
     "ThreadMap": {
       "type": "object",
@@ -217,19 +217,13 @@
             ],
             "additionalProperties": false
           }
-        },
-        "quoted": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
         }
       },
       "required": [
         "comments"
       ],
       "additionalProperties": false,
-      "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional."
+      "description": "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. The page marks the comments the edition quotes."
     },
     "Story": {
       "type": "object",
@@ -315,7 +309,7 @@
     "Quote": {
       "type": "object",
       "properties": {
-        "id": {
+        "commentId": {
           "type": "number"
         },
         "excerpt": {
@@ -323,10 +317,10 @@
         }
       },
       "required": [
-        "id"
+        "commentId"
       ],
       "additionalProperties": false,
-      "description": "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment."
+      "description": "A comment from the thread, by its id, and the words quoted from it. excerpt must be copied character for character from that comment. Only a Quote in an Exchange may leave it out, to print the whole comment."
     },
     "Section": {
       "type": "object",
@@ -439,7 +433,7 @@
     "PullQuote": {
       "type": "object",
       "properties": {
-        "id": {
+        "commentId": {
           "type": "number"
         },
         "excerpt": {
@@ -447,10 +441,11 @@
         }
       },
       "required": [
-        "id"
+        "commentId",
+        "excerpt"
       ],
       "additionalProperties": false,
-      "description": "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate."
+      "description": "A large display quote: one line from a comment, copied exactly from it (excerpt). Use sparingly, at most one per edition, for a line that sums up a whole debate."
     },
     "Exchange": {
       "type": "object",
@@ -486,7 +481,7 @@
         "sides"
       ],
       "additionalProperties": false,
-      "description": "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner."
+      "description": "Where the thread splits, as 2 or 3 sides in one row, each with the comments behind it. A bar shows how many of the cited comments back each side, so cite in proportion to each side's support. Never declares a winner."
     },
     "Side": {
       "type": "object",
@@ -518,7 +513,7 @@
         "title": {
           "type": "string"
         },
-        "points": {
+        "items": {
           "type": "array",
           "items": {
             "type": "string"
@@ -527,10 +522,10 @@
       },
       "required": [
         "title",
-        "points"
+        "items"
       ],
       "additionalProperties": false,
-      "description": "What the linked article says, as short points, kept visibly apart from what commenters said."
+      "description": "What the linked article says, as short points, kept visibly apart from what commenters said. The page labels it \"From the article\" with the site's name; title says whose account it is (\"What the post says\")."
     },
     "ArticleQuote": {
       "type": "object",
@@ -563,7 +558,7 @@
         "items"
       ],
       "additionalProperties": false,
-      "description": "A numbered summary box: 3 to 5 one-sentence takeaways."
+      "description": "A numbered summary box (\"At a glance\"): 3 to 5 one-sentence takeaways."
     },
     "OpenQuestions": {
       "type": "object",
@@ -587,16 +582,16 @@
         "question": {
           "type": "string"
         },
-        "id": {
+        "commentId": {
           "type": "number"
         }
       },
       "required": [
         "question",
-        "id"
+        "commentId"
       ],
       "additionalProperties": false,
-      "description": "A question the thread left unsettled, and the id of the comment that raised it."
+      "description": "A question the thread left unsettled, and the comment that raised it. The page credits that commenter, so the question doesn't name them."
     },
     "ReadingList": {
       "type": "object",
@@ -646,7 +641,7 @@
         "url": {
           "type": "string"
         },
-        "ids": {
+        "commentIds": {
           "type": "array",
           "items": {
             "type": "number"
@@ -658,7 +653,7 @@
         "note"
       ],
       "additionalProperties": false,
-      "description": "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it."
+      "description": "Something worth following up. url must be a link that appears in the thread; the page credits the commenters who posted it. For things named without a link, pass \"\" as url and give commentIds, the comments that mention it. With a url, commentIds is ignored."
     },
     "FactBox": {
       "type": "object",
@@ -689,7 +684,7 @@
         "label": {
           "type": "string"
         },
-        "id": {
+        "commentId": {
           "type": "number"
         }
       },
@@ -698,7 +693,7 @@
         "label"
       ],
       "additionalProperties": false,
-      "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give the comment id when it comes from the thread."
+      "description": "A figure and what it counts (\"2 PB\", \"of data in the warehouse\"). It must be stated in the article or a comment; give commentId when it comes from a comment, and the page credits the commenter."
     },
     "Timeline": {
       "type": "object",
@@ -718,7 +713,7 @@
         "events"
       ],
       "additionalProperties": false,
-      "description": "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time."
+      "description": "A chronology (\"How it unfolded\"), 3 to 7 Events, for incidents, histories and projects that changed over time."
     },
     "Event": {
       "type": "object",
@@ -729,7 +724,7 @@
         "what": {
           "type": "string"
         },
-        "id": {
+        "commentId": {
           "type": "number"
         }
       },
@@ -738,7 +733,7 @@
         "what"
       ],
       "additionalProperties": false,
-      "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give the comment id when the thread is the source."
+      "description": "One entry in a Timeline: when it happened (\"2021\", \"March\", \"9:14 a.m.\") and what happened, in one sentence. Give commentId when a comment is the source, and the page credits the commenter."
     },
     "Cast": {
       "type": "object",
@@ -763,24 +758,24 @@
     "Person": {
       "type": "object",
       "properties": {
-        "id": {
+        "commentId": {
           "type": "number"
         },
-        "who": {
+        "about": {
           "type": "string"
         }
       },
       "required": [
-        "id",
-        "who"
+        "commentId",
+        "about"
       ],
       "additionalProperties": false,
-      "description": "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves."
+      "description": "A commenter, identified by one of their comments: the page prints their username and links to that comment. about says who they are in a short phrase, from what they say about themselves."
     },
     "VoxPop": {
       "type": "object",
       "properties": {
-        "title": {
+        "question": {
           "type": "string"
         },
         "quotes": {
@@ -791,11 +786,11 @@
         }
       },
       "required": [
-        "title",
+        "question",
         "quotes"
       ],
       "additionalProperties": false,
-      "description": "Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
+      "description": "Readers answering one question in their own words, side by side (\"Why are people still on Ubuntu?\"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it."
     },
     "Correction": {
       "type": "object",

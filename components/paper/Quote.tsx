@@ -15,8 +15,8 @@ import { HighlightTarget } from "./Highlight";
 import styles from "./Quote.module.css";
 
 export type QuoteRef = {
-  id: number;
-  /** An exact excerpt of the comment. Omitted or unverifiable → the full comment is shown. */
+  commentId: number;
+  /** Words copied exactly from the comment. Only an Exchange prints a comment without one. */
   excerpt?: string;
 };
 
@@ -33,7 +33,7 @@ function Byline({ thread, comment }: { thread: Thread; comment: Comment }) {
       <a className={styles.author} href={hnUserUrl(comment.author)}>
         {comment.author}
       </a>
-      {isOp && <span className={styles.op}>author</span>}
+      {isOp && <span className={styles.op}>poster</span>}
       {parent && <span className={styles.meta}>replying to {parent.author}</span>}
       <a className={styles.meta} href={hnItemUrl(comment.id)}>
         {formatElapsed(hoursAfterPost(thread, comment.time))} ↗
@@ -42,19 +42,17 @@ function Byline({ thread, comment }: { thread: Thread; comment: Comment }) {
   );
 }
 
-/** A display quote. Unknown ids render nothing. */
-export function PullQuote({ id, excerpt }: QuoteRef) {
+/** A display quote. Renders nothing unless the excerpt is verbatim. */
+export function PullQuote({ commentId, excerpt }: { commentId: number; excerpt: string }) {
   const thread = useThread();
-  const comment = quotedComment(thread, id, excerpt);
+  const comment = quotedComment(thread, commentId, excerpt);
   if (!comment) return null;
   return (
     // data-pull: placed between sections, the quote breaks out across the story (Paper.module.css).
     <HighlightTarget id={comment.id} className={styles.pull} data-pull>
       <figure>
         <blockquote>
-          {quotedText(comment, excerpt).map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
+          <p>{excerpt}</p>
         </blockquote>
         <figcaption>
           <Byline thread={thread} comment={comment} />
@@ -67,15 +65,15 @@ export function PullQuote({ id, excerpt }: QuoteRef) {
 /** A back-and-forth. Renders nothing unless each comment replies to the one before it. */
 export function Exchange({ quotes }: { quotes: QuoteRef[] }) {
   const thread = useThread();
-  if (!isReplyChain(thread, quotes.map((q) => q.id))) return null;
+  if (!isReplyChain(thread, quotes.map((q) => q.commentId))) return null;
   return (
     // data-linear: a conversation reads top to bottom, so its section is never set in columns.
     <ol className={styles.exchange} data-linear="measure">
-      {quotes.map(({ id, excerpt }) => {
-        const comment = getComment(thread, id)!;
+      {quotes.map(({ commentId, excerpt }) => {
+        const comment = getComment(thread, commentId)!;
         return (
-          <li key={id}>
-            <HighlightTarget id={id} className={styles.turn}>
+          <li key={commentId}>
+            <HighlightTarget id={commentId} className={styles.turn}>
               <Byline thread={thread} comment={comment} />
               {quotedText(comment, excerpt).map((p, i) => (
                 <p key={i}>{p}</p>
@@ -93,9 +91,9 @@ export function Exchange({ quotes }: { quotes: QuoteRef[] }) {
  * the comment. When the paragraph doesn't name the commenter, a small credit follows. Renders
  * nothing unless the excerpt is verbatim, so a paragraph can never put words in someone's mouth.
  */
-export function Cite({ id, excerpt, paragraph = "" }: QuoteRef & { paragraph?: string }) {
+export function Cite({ commentId, excerpt, paragraph = "" }: QuoteRef & { paragraph?: string }) {
   const thread = useThread();
-  const comment = excerpt ? quotedComment(thread, id, excerpt) : null;
+  const comment = excerpt ? quotedComment(thread, commentId, excerpt) : null;
   if (!comment || !excerpt) return null;
   const named = paragraph.includes(comment.author);
   return (
@@ -122,9 +120,9 @@ function opening(comment: Comment, max = 220): string {
 }
 
 /** A short attributed excerpt, used inside other components. Without an excerpt, the comment's opening. */
-export function Citation({ id, excerpt }: QuoteRef) {
+export function Citation({ commentId, excerpt }: QuoteRef) {
   const thread = useThread();
-  const comment = quotedComment(thread, id, excerpt);
+  const comment = quotedComment(thread, commentId, excerpt);
   if (!comment) return null;
   const text = excerpt ?? opening(comment);
   return (

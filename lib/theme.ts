@@ -1,6 +1,6 @@
 export type Theme = "light" | "dark";
 
-export const THEME_KEY = "hackerpaper-theme";
+export const THEME_KEY = "hntimes-theme";
 
 /**
  * Runs in <head> before first paint so a saved choice never flashes the other theme.

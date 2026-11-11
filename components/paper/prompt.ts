@@ -1,11 +1,12 @@
-import type { PromptOptions } from "@openuidev/lang-core";
-import { commentTimelineSpec } from "@/lib/tools";
+import type { CloudPromptOptions } from "@openuidev/lang-core";
 
 // How the model should write an edition. Kept apart from the catalog (a client module) so the
-// generation route on the server can use it too.
-export const promptOptions: PromptOptions = {
+// generation route on the server can use it too. OpenUI Cloud takes only a preamble, rules and
+// examples (its own assembler adds the rest), so the one tool, get_comment_timeline, is taught by
+// the skeleton rule below.
+export const promptOptions: CloudPromptOptions = {
   preamble:
-    "You write editions of The HN Times, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, earlier HN stories from the same site, and images you may print. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
+    "You write editions of The HN Times, a newspaper page about a Hacker News thread. You are given the thread (every comment with its id), the article the story links to, HN profiles of the people most involved, and earlier HN stories from the same site. Before writing, plan the edition: what the story is, whether it's a narrative or a portrait, its beats, and who it's told through. File one edition in OpenUI Lang. Write nothing but the program.",
   additionalRules: [
     'The page renders while you write, so start with exactly this skeleton, in this order, then continue in reading order (Story and its contents top to bottom, then Sidebar, then Colophon), defining each name right after the line that first uses it:\nroot = Edition([headline, map, story, sidebar, colophon])\nheadline = Headline(...)\ntimeline = Query("get_comment_timeline", {id: <story id>}, {comments: []})\nmap = ThreadMap(timeline.comments)\nEvery edition has the ThreadMap.',
 
@@ -34,18 +35,14 @@ export const promptOptions: PromptOptions = {
     "If Earlier on Hacker News lists stories, use the most relevant one or two as history in Prose: the year, what the story was, and how large the discussion was.",
 
     // Accuracy
-    "Never write words for a commenter. Quote people only through cites, PullQuote, Exchange, Positions, VoxPop or Correction, by comment id; every excerpt must be copied exactly from that comment. Every Quote outside an Exchange carries an excerpt of one or two sentences.",
+    "Never write words for a commenter. Quote people only through cites, PullQuote, Exchange, Positions, VoxPop or Correction, by comment id; every excerpt must be copied exactly from that comment. Every Quote outside an Exchange carries an excerpt, two sentences at most.",
     "Only use comment ids and link urls that appear in the thread. Only state facts found in the thread, the article or the earlier stories list. FactBox figures must appear in the article or a comment.",
     "Anything that is not from these sources (definitions, background) goes in a Term.",
     "Be fair: give each side of a disagreement its strongest form, and don't declare a winner on a question of fact or judgment.",
     "get_comment_timeline is the only tool. Never write thread data by hand; the ThreadMap marks quoted comments on its own.",
     "This edition has no images: never use LeadArt.",
-    // Images are off for now. When they're back, replace the rule above with:
+    // Images are off for now. When they're back, add "and images you may print" to the preamble's
+    // list of what the writer is given, and replace the rule above with:
     // "If Images lists a fitting image, open the Story with a LeadArt using its src and credit exactly. LeadArt may only use a listed image; if none fits, leave LeadArt out.",
   ],
-  // Editions only read data: no $variables, mutations or built-in functions.
-  tools: [commentTimelineSpec],
-  toolCalls: true,
-  bindings: false,
-  builtinFunctions: false,
 };

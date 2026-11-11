@@ -5,7 +5,7 @@ import { THEME_KEY, type Theme } from "@/lib/theme";
 import styles from "./Masthead.module.css";
 
 const darkQuery = () => matchMedia("(prefers-color-scheme: dark)");
-const CHANGE = "hackerpaper-theme-change";
+const CHANGE = "hntimes-theme-change";
 
 function currentTheme(): Theme {
   const chosen = document.documentElement.dataset.theme;

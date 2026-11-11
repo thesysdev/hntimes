@@ -20,11 +20,11 @@ import { ThreadMap } from "./ThreadMap";
 const QuotePart = defineComponent({
   name: "Quote",
   props: z.object({
-    id: z.number(),
+    commentId: z.number(),
     excerpt: z.string().optional(),
   }),
   description:
-    "A comment from the thread, by id. excerpt must be copied character for character from that comment; omit it to quote the whole comment.",
+    "A comment from the thread, by its id, and the words quoted from it. excerpt must be copied character for character from that comment. Only a Quote in an Exchange may leave it out, to print the whole comment.",
   component: () => null,
 });
 
@@ -54,9 +54,10 @@ const QuestionPart = defineComponent({
   name: "Question",
   props: z.object({
     question: z.string(),
-    id: z.number(),
+    commentId: z.number(),
   }),
-  description: "A question the thread left unsettled, and the id of the comment that raised it.",
+  description:
+    "A question the thread left unsettled, and the comment that raised it. The page credits that commenter, so the question doesn't name them.",
   component: () => null,
 });
 
@@ -66,10 +67,10 @@ const ResourcePart = defineComponent({
     name: z.string(),
     note: z.string(),
     url: z.string().optional(),
-    ids: z.array(z.number()).optional(),
+    commentIds: z.array(z.number()).optional(),
   }),
   description:
-    "Something worth following up. url must be a link that appears in the thread; for things named without a link, omit url and give the ids of the comments that mention it.",
+    "Something worth following up. url must be a link that appears in the thread; the page credits the commenters who posted it. For things named without a link, pass \"\" as url and give commentIds, the comments that mention it. With a url, commentIds is ignored.",
   component: () => null,
 });
 
@@ -88,10 +89,10 @@ const FactPart = defineComponent({
   props: z.object({
     value: z.string(),
     label: z.string(),
-    id: z.number().optional(),
+    commentId: z.number().optional(),
   }),
   description:
-    'A figure and what it counts ("2 PB", "of data in the warehouse"). It must be stated in the article or a comment; give the comment id when it comes from the thread.',
+    'A figure and what it counts ("2 PB", "of data in the warehouse"). It must be stated in the article or a comment; give commentId when it comes from a comment, and the page credits the commenter.',
   component: () => null,
 });
 
@@ -100,21 +101,21 @@ const EventPart = defineComponent({
   props: z.object({
     when: z.string(),
     what: z.string(),
-    id: z.number().optional(),
+    commentId: z.number().optional(),
   }),
   description:
-    'One entry in a Timeline: when it happened ("2021", "March", "9:14 a.m.") and what happened, in one sentence. Give the comment id when the thread is the source.',
+    'One entry in a Timeline: when it happened ("2021", "March", "9:14 a.m.") and what happened, in one sentence. Give commentId when a comment is the source, and the page credits the commenter.',
   component: () => null,
 });
 
 const PersonPart = defineComponent({
   name: "Person",
   props: z.object({
-    id: z.number(),
-    who: z.string(),
+    commentId: z.number(),
+    about: z.string(),
   }),
   description:
-    "A commenter, by one of their comments (the page prints their username from it), and who they are in a short phrase from what they say about themselves.",
+    "A commenter, identified by one of their comments: the page prints their username and links to that comment. about says who they are in a short phrase, from what they say about themselves.",
   component: () => null,
 });
 
@@ -141,12 +142,12 @@ const ProseBlock = defineComponent({
 const PullQuoteBlock = defineComponent({
   name: "PullQuote",
   props: z.object({
-    id: z.number(),
-    excerpt: z.string().optional(),
+    commentId: z.number(),
+    excerpt: z.string(),
   }),
   description:
-    "A large display quote of one comment. Use sparingly, at most one or two per edition, for a line that sums up a whole debate.",
-  component: ({ props }) => <PullQuote id={props.id} excerpt={props.excerpt} />,
+    "A large display quote: one line from a comment, copied exactly from it (excerpt). Use sparingly, at most one per edition, for a line that sums up a whole debate.",
+  component: ({ props }) => <PullQuote commentId={props.commentId} excerpt={props.excerpt} />,
 });
 
 const ExchangeBlock = defineComponent({
@@ -166,7 +167,7 @@ const PositionsBlock = defineComponent({
     sides: z.array(SidePart.ref),
   }),
   description:
-    "Where the thread splits, as 2 or 3 sides with the comments behind each, shown in one row. More than 3 sides are folded into an \"Others\" side, so prefer 2 or 3. Shows how the cited comments divide; never declares a winner.",
+    "Where the thread splits, as 2 or 3 sides in one row, each with the comments behind it. A bar shows how many of the cited comments back each side, so cite in proportion to each side's support. Never declares a winner.",
   component: ({ props }) => (
     <Positions
       question={props.question}
@@ -179,10 +180,11 @@ const ArticleSummaryBlock = defineComponent({
   name: "ArticleSummary",
   props: z.object({
     title: z.string(),
-    points: z.array(z.string()),
+    items: z.array(z.string()),
   }),
-  description: "What the linked article says, as short points, kept visibly apart from what commenters said.",
-  component: ({ props }) => <ArticleSummary title={props.title} points={props.points} />,
+  description:
+    'What the linked article says, as short points, kept visibly apart from what commenters said. The page labels it "From the article" with the site\'s name; title says whose account it is ("What the post says").',
+  component: ({ props }) => <ArticleSummary title={props.title} items={props.items} />,
 });
 
 const ArticleQuoteBlock = defineComponent({
@@ -200,7 +202,7 @@ const KeyPointsBlock = defineComponent({
     title: z.string(),
     items: z.array(z.string()),
   }),
-  description: "A numbered summary box: 3 to 5 one-sentence takeaways.",
+  description: 'A numbered summary box ("At a glance"): 3 to 5 one-sentence takeaways.',
   component: ({ props }) => <KeyPoints title={props.title} items={props.items} />,
 });
 
@@ -253,7 +255,7 @@ const TimelineBlock = defineComponent({
     title: z.string(),
     events: z.array(EventPart.ref),
   }),
-  description: "A chronology of 3 to 7 Events, for incidents, histories and projects that changed over time.",
+  description: 'A chronology ("How it unfolded"), 3 to 7 Events, for incidents, histories and projects that changed over time.',
   component: ({ props }) => <Timeline title={props.title} events={props.events.map((e) => e.props)} />,
 });
 
@@ -270,12 +272,12 @@ const CastBlock = defineComponent({
 const VoxPopBlock = defineComponent({
   name: "VoxPop",
   props: z.object({
-    title: z.string(),
+    question: z.string(),
     quotes: z.array(QuotePart.ref),
   }),
   description:
-    'Readers answering one question in their own words, side by side. title is the question they were answering, phrased as a question ("Why are people still on Ubuntu?"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it.',
-  component: ({ props }) => <VoxPop title={props.title} quotes={props.quotes.map((q) => q.props)} />,
+    'Readers answering one question in their own words, side by side ("Why are people still on Ubuntu?"). Two to four Quotes from different readers, each with an excerpt of one sentence that answers it.',
+  component: ({ props }) => <VoxPop question={props.question} quotes={props.quotes.map((q) => q.props)} />,
 });
 
 const CorrectionBlock = defineComponent({
@@ -327,7 +329,7 @@ const HeadlineBlock = defineComponent({
     dek: z.string(),
   }),
   description:
-    "The banner: a short section label (kicker), an editor's headline about what the thread is really about, and a one-sentence summary (dek).",
+    "The banner: the beat in one or two words (kicker), an editor's headline that says plainly what happened (title), and one sentence on what the link is and how readers took it (dek).",
   component: ({ props }) => <Headline kicker={props.kicker} title={props.title} dek={props.dek} />,
 });
 
@@ -342,11 +344,10 @@ const ThreadMapBlock = defineComponent({
         hours: z.number(),
       }),
     ),
-    quoted: z.array(z.number()).optional(),
   }),
   description:
-    "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. Comments quoted on the page are marked automatically; quoted is optional.",
-  component: ({ props }) => <ThreadMap comments={props.comments ?? []} quoted={props.quoted ?? []} />,
+    "The lead graphic: every comment plotted by time and reply depth. comments is the comments list from the get_comment_timeline Query. The page marks the comments the edition quotes.",
+  component: ({ props }) => <ThreadMap comments={props.comments ?? []} />,
 });
 
 const LedeBlock = defineComponent({

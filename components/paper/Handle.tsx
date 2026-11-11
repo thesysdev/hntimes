@@ -40,6 +40,9 @@ export function Handle({ name, id }: { name: string; id?: number | null }) {
   );
 }
 
+/** Text with the @ dropped from each @name, for places that can't hold a link (inside another link). */
+export const withoutAt = (text: string) => text.replace(/(?<![\w.])@(?=[A-Za-z0-9_-]{2,15}(?![\w-]))/g, "");
+
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**

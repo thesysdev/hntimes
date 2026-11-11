@@ -123,10 +123,9 @@ export function editionPrompt(
     article
       ? [article.title ? `Title: ${article.title}` : "", article.text].filter(Boolean).join("\n\n")
       : "Not available. Do not use ArticleSummary or ArticleQuote.",
-    "",
-    "# Images",
-    "Each: src · credit · what it shows.",
-    ...(images.length ? images.map((i) => `${i.src} · credit: ${i.credit} · shows: ${i.shows}`) : ["None."]),
+    ...(images.length
+      ? ["", "# Images", "Each: src · credit · what it shows.", ...images.map((i) => `${i.src} · credit: ${i.credit} · shows: ${i.shows}`)]
+      : []),
     "",
     "# People",
     "HN profiles of the poster and of the commenters whose comments drew the most replies.",

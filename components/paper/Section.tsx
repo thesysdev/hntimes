@@ -8,7 +8,9 @@ import styles from "./Section.module.css";
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className={styles.section}>
-      <h2 className={styles.title}>{title}</h2>
+      <h2 className={styles.title}>
+        <LinkNames text={title} />
+      </h2>
       <div data-columns>{children}</div>
     </section>
   );
@@ -87,22 +89,26 @@ export function Prose({
       </p>
       {used.map((t) => (
         <TermNote key={t.term} term={t.term}>
-          {t.definition}
+          <LinkNames text={t.definition} />
         </TermNote>
       ))}
     </>
   );
 }
 
-export function KeyPoints({ title, items }: { title: string; items: React.ReactNode[] }) {
+export function KeyPoints({ title, items }: { title: string; items: string[] }) {
   return (
     <aside className={styles.keyPoints}>
-      <h3 className={styles.keyTitle}>{title}</h3>
+      <h3 className={styles.keyTitle}>
+        <LinkNames text={title} />
+      </h3>
       <ol>
         {items.map((item, i) => (
           <li key={i}>
             <span className={styles.keyNumber}>{i + 1}</span>
-            <span>{typeof item === "string" ? <LinkNames text={item} /> : item}</span>
+            <span>
+              <LinkNames text={item} />
+            </span>
           </li>
         ))}
       </ol>

@@ -37,7 +37,7 @@ export function Positions({ question, sides }: { question: string; sides: Side[]
   const thread = useThread();
   const counted = foldSides(sides).map((s) => ({
     ...s,
-    quotes: s.quotes.filter((q) => getComment(thread, q.id)),
+    quotes: s.quotes.filter((q) => getComment(thread, q.commentId)),
   }));
   const total = counted.reduce((n, s) => n + s.quotes.length, 0);
   if (total === 0) return null;
@@ -60,14 +60,14 @@ export function Positions({ question, sides }: { question: string; sides: Side[]
         {counted.map((s, i) => (
           <section key={s.label} className={styles.side} data-side={i}>
             <h3 className={styles.label}>
-              {s.label} <span className={styles.count}>{s.quotes.length}</span>
+              <LinkNames text={s.label} /> <span className={styles.count}>{s.quotes.length}</span>
             </h3>
             <p className={styles.summary}>
               <LinkNames text={s.summary} />
             </p>
             <div>
               {s.quotes.map((q, j) => (
-                <Citation key={`${q.id}-${j}`} {...q} />
+                <Citation key={`${q.commentId}-${j}`} {...q} />
               ))}
             </div>
           </section>

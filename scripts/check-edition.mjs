@@ -36,7 +36,7 @@ const elements = [];
 
 const quoted = new Set();
 for (const el of elements.filter((e) => e.typeName === "Quote" || e.typeName === "PullQuote")) {
-  const { id, excerpt } = el.props;
+  const { commentId: id, excerpt } = el.props;
   const comment = thread.comments[id];
   if (!comment) {
     problems.push({ code: "unknown-comment", message: `${el.typeName}(${id}): no such comment` });
@@ -47,7 +47,7 @@ for (const el of elements.filter((e) => e.typeName === "Quote" || e.typeName ===
     problems.push({ code: "not-verbatim", message: `${el.typeName}(${id}) by ${comment.author}: "${excerpt}"` });
 }
 for (const el of elements.filter((e) => ["Question", "Person", "Fact", "Event"].includes(e.typeName))) {
-  const { id } = el.props;
+  const { commentId: id } = el.props;
   if (id !== undefined && !thread.comments[id]) problems.push({ code: "unknown-comment", message: `${el.typeName}(${id})` });
 }
 

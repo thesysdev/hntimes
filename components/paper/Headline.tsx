@@ -1,4 +1,5 @@
 import { hnItemUrl, hnUserUrl } from "@/lib/thread";
+import { LinkNames } from "./Handle";
 import type { QuoteRef } from "./Quote";
 import { weave } from "./Section";
 import { useThread } from "./ThreadContext";
@@ -23,8 +24,12 @@ export function Headline({ kicker, title, dek }: HeadlineProps) {
   return (
     <header className={styles.headline}>
       <p className={styles.kicker}>{kicker}</p>
-      <h1 className={styles.title}>{title}</h1>
-      <p className={styles.dek}>{dek}</p>
+      <h1 className={styles.title}>
+        <LinkNames text={title} />
+      </h1>
+      <p className={styles.dek}>
+        <LinkNames text={dek} />
+      </p>
       <div className={styles.byline}>
         <p className={styles.bylineName}>
           From a <a href={hnItemUrl(story.id)}>Hacker News thread</a> started by{" "}

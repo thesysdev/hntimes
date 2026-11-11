@@ -24,9 +24,9 @@ const BY_ID = new Set(["Quote", "PullQuote", "Person"]);
 function quotedIds(node: unknown, ids = new Set<number>()): Set<number> {
   if (Array.isArray(node)) node.forEach((child) => quotedIds(child, ids));
   else if (node && typeof node === "object") {
-    const el = node as { type?: string; typeName?: string; props?: { id?: unknown } };
-    if (el.type === "element" && BY_ID.has(el.typeName ?? "") && typeof el.props?.id === "number")
-      ids.add(el.props.id);
+    const el = node as { type?: string; typeName?: string; props?: { commentId?: unknown } };
+    if (el.type === "element" && BY_ID.has(el.typeName ?? "") && typeof el.props?.commentId === "number")
+      ids.add(el.props.commentId);
     Object.values(node).forEach((child) => quotedIds(child, ids));
   }
   return ids;

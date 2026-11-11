@@ -12,28 +12,30 @@ type Fact = {
   value: string;
   label: string;
   /** The comment the figure comes from; omitted for figures from the article. */
-  id?: number;
+  commentId?: number;
 };
 
 /** "By the numbers": a few large figures with what each one counts. */
 export function FactBox({ title, facts }: { title: string; facts: Fact[] }) {
   const thread = useThread();
   // A figure credited to a comment that isn't in the thread is dropped.
-  const shown = facts.filter((f) => f.id === undefined || getComment(thread, f.id));
+  const shown = facts.filter((f) => f.commentId === undefined || getComment(thread, f.commentId));
   if (shown.length === 0) return null;
   return (
     // data-box: placed between sections, it breaks out across the story (Paper.module.css).
     <aside className={styles.facts} data-box>
-      <h3 className={styles.boxTitle}>{title}</h3>
+      <h3 className={styles.boxTitle}>
+        <LinkNames text={title} />
+      </h3>
       <dl>
         {shown.map((fact, i) => (
           <div key={i} className={styles.fact}>
             <dt className={styles.value}>{fact.value}</dt>
             <dd className={styles.label}>
               <LinkNames text={fact.label} />
-              {fact.id !== undefined && !fact.label.includes(getComment(thread, fact.id)!.author) && (
-                <a href={hnItemUrl(fact.id)} className={styles.source}>
-                  {getComment(thread, fact.id)!.author}
+              {fact.commentId !== undefined && !fact.label.includes(getComment(thread, fact.commentId)!.author) && (
+                <a href={hnItemUrl(fact.commentId)} className={styles.source}>
+                  {getComment(thread, fact.commentId)!.author}
                 </a>
               )}
             </dd>
@@ -47,27 +49,29 @@ export function FactBox({ title, facts }: { title: string; facts: Fact[] }) {
 type Event = {
   when: string;
   what: string;
-  id?: number;
+  commentId?: number;
 };
 
 /** A chronology: what happened when, each entry optionally tied to the comment that reports it. */
 export function Timeline({ title, events }: { title: string; events: Event[] }) {
   const thread = useThread();
-  const shown = events.filter((e) => e.id === undefined || getComment(thread, e.id));
+  const shown = events.filter((e) => e.commentId === undefined || getComment(thread, e.commentId));
   if (shown.length === 0) return null;
   return (
     // data-linear: a chronology reads top to bottom, so its section is never set in columns.
     <section className={styles.timeline} data-linear="measure">
-      <h3 className={styles.boxTitle}>{title}</h3>
+      <h3 className={styles.boxTitle}>
+        <LinkNames text={title} />
+      </h3>
       <ol>
         {shown.map((event, i) => (
           <li key={i} className={styles.event}>
             <span className={styles.when}>{event.when}</span>
             <span className={styles.what}>
               <LinkNames text={event.what} />
-              {event.id !== undefined && !event.what.includes(getComment(thread, event.id)!.author) && (
-                <a href={hnItemUrl(event.id)} className={styles.source}>
-                  {getComment(thread, event.id)!.author}
+              {event.commentId !== undefined && !event.what.includes(getComment(thread, event.commentId)!.author) && (
+                <a href={hnItemUrl(event.commentId)} className={styles.source}>
+                  {getComment(thread, event.commentId)!.author}
                 </a>
               )}
             </span>
@@ -81,25 +85,27 @@ export function Timeline({ title, events }: { title: string; events: Event[] }) 
 const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
 
 /** "Who's talking": the people the story is told through, named from the thread itself. */
-export function Cast({ title, people }: { title: string; people: { id: number; who: string }[] }) {
+export function Cast({ title, people }: { title: string; people: { commentId: number; about: string }[] }) {
   const thread = useThread();
   // One entry per person, and only people who are in the thread.
   const seen = new Set<string>();
-  const shown = people.flatMap(({ id, who }) => {
-    const comment = getComment(thread, id);
+  const shown = people.flatMap(({ commentId, about }) => {
+    const comment = getComment(thread, commentId);
     if (!comment || seen.has(comment.author)) return [];
     seen.add(comment.author);
     const karma = thread.people?.[comment.author]?.karma;
-    return [{ id, who, karma, author: comment.author, isOp: comment.author === thread.story.author }];
+    return [{ commentId, about, karma, author: comment.author, isOp: comment.author === thread.story.author }];
   });
   if (shown.length === 0) return null;
   return (
     <aside className={styles.cast}>
-      <h3 className={styles.boxTitle}>{title}</h3>
+      <h3 className={styles.boxTitle}>
+        <LinkNames text={title} />
+      </h3>
       <ul>
         {shown.map((person) => (
-          <li key={person.id}>
-            <HighlightTarget id={person.id} className={styles.person}>
+          <li key={person.commentId}>
+            <HighlightTarget id={person.commentId} className={styles.person}>
               <a href={hnUserUrl(person.author)} className={styles.name}>
                 {person.author}
               </a>
@@ -108,8 +114,8 @@ export function Cast({ title, people }: { title: string; people: { id: number; w
                 <span className={styles.karma}>{compact.format(person.karma)} karma</span>
               )}
               <span className={styles.who}>
-                <LinkNames text={person.who} />{" "}
-                <a href={hnItemUrl(person.id)} className={styles.source}>
+                <LinkNames text={person.about} />{" "}
+                <a href={hnItemUrl(person.commentId)} className={styles.source}>
                   comment ↗
                 </a>
               </span>
@@ -125,7 +131,7 @@ export function Cast({ title, people }: { title: string; people: { id: number; w
 function useVerified(quotes: QuoteRef[]) {
   const thread = useThread();
   return quotes.flatMap((q) => {
-    const comment = q.excerpt ? quotedComment(thread, q.id, q.excerpt) : null;
+    const comment = q.excerpt ? quotedComment(thread, q.commentId, q.excerpt) : null;
     return comment && q.excerpt ? [{ id: comment.id, excerpt: q.excerpt, comment }] : [];
   });
 }
@@ -134,7 +140,7 @@ function useVerified(quotes: QuoteRef[]) {
  * A vox pop: the question readers were answering, then their short answers side by side, each
  * signed directly beneath.
  */
-export function VoxPop({ title, quotes }: { title: string; quotes: QuoteRef[] }) {
+export function VoxPop({ question, quotes }: { question: string; quotes: QuoteRef[] }) {
   const shown = useVerified(quotes).slice(0, 4);
   if (shown.length < 2) return null;
   return (
@@ -142,7 +148,7 @@ export function VoxPop({ title, quotes }: { title: string; quotes: QuoteRef[] })
     <aside className={styles.vox} data-box>
       <p className={styles.voxLabel}>Readers respond</p>
       <h3 className={styles.voxQuestion}>
-        <LinkNames text={title} />
+        <LinkNames text={question} />
       </h3>
       <ul style={{ "--voices": shown.length } as React.CSSProperties}>
         {shown.map(({ id, excerpt, comment }, i) => (
