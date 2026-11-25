@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Libre_Franklin, Newsreader, Germania_One } from "next/font/google";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SITE } from "@/lib/site";
-import { themeScript } from "@/lib/theme";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -41,24 +39,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#121212" },
-  ],
+  colorScheme: "light",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // The theme script sets data-theme before hydration, so the attribute can differ from the server's.
     <html
       lang="en"
       className={`${newsreader.variable} ${franklin.variable} ${germania.variable} ${geistMono.variable}`}
-      suppressHydrationWarning
     >
       <body>
-        <Script id="theme" strategy="beforeInteractive">
-          {themeScript}
-        </Script>
         {children}
         <Analytics />
       </body>

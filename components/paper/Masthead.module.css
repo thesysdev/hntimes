@@ -57,36 +57,13 @@
   color: var(--ink-3);
 }
 
-.themeToggle {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35em;
-  min-width: 4.5em;
-  justify-content: flex-end;
-  color: var(--ink-2);
-  font: inherit;
-  text-transform: capitalize;
-  cursor: pointer;
-}
-
-.themeToggle:hover {
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.themeIcon {
-  font-size: 1.3em;
-  line-height: 1;
-}
-
 @media (max-width: 640px) {
-  .date,
-  .edition {
-    display: none;
+  .folio {
+    justify-content: center;
   }
 
+  .date,
   .end {
-    flex: none;
+    display: none;
   }
 }

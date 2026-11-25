@@ -3,28 +3,26 @@
 /*
  * The HN Times design tokens.
  * Paper and ink, one accent, and three voices: thread (accent), article (ink), added context (note).
- * Colors are light-dark() pairs: the system setting picks one, unless the reader chose a theme
- * (data-theme on <html>, set by ThemeToggle).
  */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* Newsprint: white paper, near-black ink, hairline rules. */
-  --paper: light-dark(#ffffff, #121212);
-  --paper-2: light-dark(#f7f7f5, #1d1d1d);
-  --ink: light-dark(#121212, #f2f2f2);
-  --ink-2: light-dark(#363636, #c9c9c9);
-  --ink-3: light-dark(#727272, #8f8f8f);
-  --rule: light-dark(#dfdfdf, #343434);
-  --rule-strong: light-dark(#121212, #f2f2f2);
+  --paper: #ffffff;
+  --paper-2: #f7f7f5;
+  --ink: #121212;
+  --ink-2: #363636;
+  --ink-3: #727272;
+  --rule: #dfdfdf;
+  --rule-strong: #121212;
 
   /* HN orange marks data only (quoted comments, the debate bar), never page chrome. */
-  --accent: light-dark(#e2570b, #ff7a2e);
-  --accent-ink: light-dark(#a8440c, #ff9b5e);
-  --accent-wash: light-dark(#f8dfc9, #3b2417);
+  --accent: #e2570b;
+  --accent-ink: #a8440c;
+  --accent-wash: #f8dfc9;
 
-  --note: light-dark(#4f6470, #9db3be); /* added context */
-  --note-wash: light-dark(#e6eaec, #252b2e);
+  --note: #4f6470; /* added context */
+  --note-wash: #e6eaec;
 
   --font-display: var(--font-germania), "Old English Text MT", serif; /* nameplate only */
   --font-text: var(--font-newsreader), Georgia, "Times New Roman", serif;
@@ -60,14 +58,6 @@
   --gutter: 2.5rem; /* between story and sidebar */
   --column-gap: 2rem; /* between text columns */
   --measure: 37.5rem; /* single-column reading width (summary, captions, phones) */
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
 }
 
 html {

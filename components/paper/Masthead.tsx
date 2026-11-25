@@ -1,6 +1,5 @@
 import Link from "next/link";
 import styles from "./Masthead.module.css";
-import { ThemeToggle } from "./ThemeToggle";
 import { Today } from "./Today";
 
 type Props = {
@@ -22,7 +21,6 @@ export function Masthead({ edition }: Props) {
         <span className={styles.tagline}>HN discussion, if it had an editor</span>
         <span className={styles.end}>
           {edition ? <span className={styles.edition}>No. {edition}</span> : null}
-          <ThemeToggle />
         </span>
       </div>
     </header>
