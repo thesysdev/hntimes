@@ -22,19 +22,6 @@
   mix-blend-mode: multiply;
 }
 
-/* On dark paper, multiply would sink the image to near black; dim it slightly instead. */
-@media (prefers-color-scheme: dark) {
-  :global(:root:not([data-theme="light"])) .image {
-    mix-blend-mode: normal;
-    filter: grayscale(1) contrast(1.05) brightness(0.85);
-  }
-}
-
-:global(:root[data-theme="dark"]) .image {
-  mix-blend-mode: normal;
-  filter: grayscale(1) contrast(1.05) brightness(0.85);
-}
-
 .caption {
   margin-top: var(--space-2);
   font-family: var(--font-ui);
